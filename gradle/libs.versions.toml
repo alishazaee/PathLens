@@ -1,0 +1,38 @@
+[versions]
+spark = "4.0.1"
+protobuf = "4.33.0"
+jackson = "2.15.2"
+junit = "5.10.0"
+testcontainers = "1.19.3"
+kafka = "3.6.1"
+
+[libraries]
+# Protobuf
+protobuf-java = { module = "com.google.protobuf:protobuf-java", version.ref = "protobuf" }
+
+# Spark
+spark-streaming = { module = "org.apache.spark:spark-streaming_2.13", version.ref = "spark" }
+spark-sql = { module = "org.apache.spark:spark-sql_2.13", version.ref = "spark" }
+spark-sql-kafka = { module = "org.apache.spark:spark-sql-kafka-0-10_2.13", version.ref = "spark" }
+
+# Jackson
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
+
+# Geo
+geohash = "ch.hsr:geohash:1.4.0"
+
+# JUnit
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+
+# Testcontainers
+testcontainers-core = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
+testcontainers-junit = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
+testcontainers-kafka = { module = "org.testcontainers:kafka", version.ref = "testcontainers" }
+
+# Kafka
+kafka-clients = { module = "org.apache.kafka:kafka-clients", version.ref = "kafka" }
+
+[bundles]
+spark = ["spark-streaming", "spark-sql", "spark-sql-kafka"]

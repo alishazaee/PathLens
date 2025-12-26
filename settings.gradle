@@ -1,0 +1,4 @@
+rootProject.name = 'streaming'
+include(':protobuf')
+include(':stream-processor')
+include(':utils')

@@ -1,0 +1,22 @@
+---
+transformConfig:
+  windowSize: "2 seconds"
+  precision: 6
+
+extractorConfig:
+  format: kafka
+  options:
+    kafka.bootstrap.servers: "willBeUpdated"
+    subscribe: "taxi-logs"
+    startingOffsets: "earliest"
+    failOnDataLoss: false
+    groupIdPrefix: "taxi-locations"
+
+loaderConfig:
+  format: kafka
+  outputMode: "update"
+  options:
+    kafka.bootstrap.servers: "willBeUpdated"
+    topic: "aggregated-taxi-locations"
+    checkpointLocation: "/tmp/checkpoints/taxi-locations"
+

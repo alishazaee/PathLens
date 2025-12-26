@@ -1,0 +1,13 @@
+package protobuf;
+option java_package = "org.shazaei.protobuf";
+option java_outer_classname = "TaxiLoc";
+
+message TaxiLocation {
+  required  string taxi_id = 1;
+  required string trip_id = 2;
+
+  required double latitude = 3;
+  required double longitude = 4;
+
+  required int64 timestamp = 7;
+}
