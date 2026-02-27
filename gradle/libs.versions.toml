@@ -1,6 +1,6 @@
 [versions]
 spark = "4.0.1"
-protobuf = "4.33.0"
+protobuf = "3.25.1"
 jackson = "2.15.2"
 junit = "5.10.0"
 testcontainers = "1.19.3"
@@ -8,7 +8,7 @@ kafka = "3.6.1"
 
 [libraries]
 # Protobuf
-protobuf-java = { module = "com.google.protobuf:protobuf-java", version.ref = "protobuf" }
+protobuf = { module = "com.google.protobuf:protobuf-java", version.ref = "protobuf" }
 
 # Spark
 spark-streaming = { module = "org.apache.spark:spark-streaming_2.13", version.ref = "spark" }

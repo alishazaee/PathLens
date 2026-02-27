@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package org.shazaei.raw_record;
+option java_package = "org.shazaei.raw_record";
+option java_outer_classname = "RawProto";
+
+message Log {
+  string deviceId = 1;
+  string record = 2;
+  string filePath = 3;
+  Type logType = 4;
+}
+
+enum Type {
+  NETFLOW = 0;
+  IPFIX = 1;
+}

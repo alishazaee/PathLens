@@ -1,0 +1,13 @@
+plugins {
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation(libs.protobuf)
+    implementation(project(":logs-proto:netflow:proto"))
+}
+

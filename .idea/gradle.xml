@@ -9,9 +9,13 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/protobuf" />
-            <option value="$PROJECT_DIR$/stream-processor" />
-            <option value="$PROJECT_DIR$/utils" />
+            <option value="$PROJECT_DIR$/logs-proto" />
+            <option value="$PROJECT_DIR$/logs-proto/netflow" />
+            <option value="$PROJECT_DIR$/logs-proto/netflow/parser" />
+            <option value="$PROJECT_DIR$/logs-proto/netflow/proto" />
+            <option value="$PROJECT_DIR$/logs-proto/raw_record" />
+            <option value="$PROJECT_DIR$/logs-proto/raw_record/log-generator" />
+            <option value="$PROJECT_DIR$/logs-proto/raw_record/proto" />
           </set>
         </option>
       </GradleProjectSettings>

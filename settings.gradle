@@ -1,4 +1,5 @@
-rootProject.name = 'streaming'
-include(':protobuf')
-include(':stream-processor')
-include(':utils')
+rootProject.name = 'pathLens'
+include(':logs-proto:netflow:proto')
+include(':logs-proto:netflow:parser')
+include(':logs-proto:raw_record:proto')
+include(':logs-proto:raw_record:log-generator')

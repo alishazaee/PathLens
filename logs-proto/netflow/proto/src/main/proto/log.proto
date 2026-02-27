@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package org.shazaei.log;
+option java_package = "org.shazaei.log";
+option java_outer_classname = "NetFlowProto";
+
+message Log {
+  double latitude = 1;
+  double longitude = 2;
+
+  int64 timestamp = 3; // epoch millis
+
+  string ipv4_src_addr = 4;
+  uint32 l4_src_port = 5;
+
+  string ipv4_dst_addr = 6;
+  uint32 l4_dst_port = 7;
+
+  int64 in_bytes = 8;
+  int64 out_bytes = 9;
+
+  ErrorType error_type = 10;
+
+  repeated Error error_summary = 11;
+  string raw_record = 12;
+}
+
+enum ErrorType {
+  SOFT = 0;
+  HARD = 1;
+}
+
+enum Error {
+  INVALID_SRC_IPV4 = 0;
+  INVALID_SRC_PORT = 1;
+  INVALID_DEST_IPV4 = 2;
+  INVALID_DEST_PORT = 3;
+  RECORD_SIZE_INCORRECT = 4;
+  INVALID_TIMESTAMP = 5;
+  INVALID_IN_BYTES = 6;
+  INVALID_OUT_BYTES = 7;
+}
