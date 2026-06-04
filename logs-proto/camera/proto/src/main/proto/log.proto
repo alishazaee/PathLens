@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package pathlens.camera;
+
+option java_package = "ir.pathlens.proto";
+option java_outer_classname = "CameraLogProto";
+
+message Log {
+    int64 timestamp = 1;
+
+    oneof src_address {
+        string ipv4_src_addr = 2;
+        string ipv6_src_addr = 3;
+    }
+
+    string plate_number = 4;
+    Device device = 5;
+    Location location = 6;
+    optional ErrorType error_type = 10;
+    repeated Error error_summary = 11;
+    string raw_record = 12;
+
+    string file_path = 13;
+    string phone_number = 14;
+}
+
+message Device {
+    string serial_number = 1;
+    DeviceStatus device_status = 2;
+    DeviceType device_type = 3;
+}
+
+message Location {
+    float latitude = 1;
+    float longitude = 2;
+    string site_id = 3;
+    string city = 4;
+    string country = 5;
+}
+
+enum ErrorType {
+    SOFT = 0;
+    HARD = 1;
+}
+
+enum DeviceStatus {
+    ACTIVE = 0;
+    INACTIVE = 1;
+}
+
+enum DeviceType {
+    RED_LIGHT_CAMERA = 0;
+    SPEED_CAMERA = 1;
+    TOLL_CAMERA = 2;
+}
+
+enum Error {
+    INVALID_SRC_IPV4 = 0;
+    INVALID_SRC_IPV6 = 1;
+    INVALID_PLATE_NUMBER = 2;
+    RECORD_SIZE_INCORRECT = 3;
+    INVALID_TIMESTAMP = 4;
+    INVALID_PHONE_NUMBER = 5;
+    INVALID_IP_VERSION = 6;
+    INVALID_SERIAL_NUMBER = 7;
+    INVALID_DEVICE_STATUS = 8;
+    INVALID_DEVICE_TYPE = 9;
+    INVALID_SITE_ID = 10;
+    INVALID_CITY = 11;
+    INVALID_COUNTRY = 12;
+    INVALID_LONGITUDE = 13;
+    INVALID_LATITUDE = 14;
+    DEVICE_NOT_FOUND = 15;
+}

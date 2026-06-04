@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package pathlens.raw.log;
+
+option java_package = "ir.pathlens.proto";
+option java_outer_classname = "RawLogProto";
+
+message Log {
+    string deviceSerialNumber = 1;
+    string record = 2;
+    string filePath = 3;
+    Type logType = 4;
+}
+
+enum Type {
+    CAMERA = 0;
+    SELF_DRIVING_CAR = 1;
+}

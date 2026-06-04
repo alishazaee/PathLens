@@ -4,14 +4,31 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
+        <compositeConfiguration>
+          <compositeBuild compositeDefinitionSource="SCRIPT">
+            <builds>
+              <build path="$PROJECT_DIR$/buildSrc" name="buildSrc">
+                <projects>
+                  <project path="$PROJECT_DIR$/buildSrc" />
+                </projects>
+              </build>
+            </builds>
+          </compositeBuild>
+        </compositeConfiguration>
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="gradleHome" value="/opt/gradle/gradle-8.12" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/protobuf" />
-            <option value="$PROJECT_DIR$/stream-processor" />
-            <option value="$PROJECT_DIR$/utils" />
+            <option value="$PROJECT_DIR$/buildSrc" />
+            <option value="$PROJECT_DIR$/common-libs" />
+            <option value="$PROJECT_DIR$/common-libs/log-generator" />
+            <option value="$PROJECT_DIR$/logs-proto" />
+            <option value="$PROJECT_DIR$/logs-proto/camera" />
+            <option value="$PROJECT_DIR$/logs-proto/camera/parser" />
+            <option value="$PROJECT_DIR$/logs-proto/camera/proto" />
+            <option value="$PROJECT_DIR$/logs-proto/raw-log" />
+            <option value="$PROJECT_DIR$/logs-proto/raw-log/proto" />
           </set>
         </option>
       </GradleProjectSettings>
