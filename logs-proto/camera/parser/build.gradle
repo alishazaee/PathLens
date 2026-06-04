@@ -1,0 +1,9 @@
+plugins {
+    id("java-conventions")
+    id("junit5-conventions")
+}
+
+dependencies {
+    api(project(":logs-proto:camera:proto"))
+    testImplementation(project(":common-libs:log-generator"))
+}
