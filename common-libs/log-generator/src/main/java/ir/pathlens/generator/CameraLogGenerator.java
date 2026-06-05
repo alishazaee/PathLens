@@ -1,15 +1,20 @@
 package ir.pathlens.generator;
 
-import ir.pathlens.proto.CameraLogProto;
+import static ir.pathlens.camera.Constants.IP_VERSION_INDEX;
+import static ir.pathlens.camera.Constants.IpVersion;
+import static ir.pathlens.camera.Constants.IpVersion.IPV4;
+import static ir.pathlens.camera.Constants.IpVersion.IPV6;
+import static ir.pathlens.camera.Constants.PHONE_NUMBER_FIELD_INDEX;
+import static ir.pathlens.camera.Constants.PLATE_NUMBER_INDEX;
+import static ir.pathlens.camera.Constants.RECORD_SIZE;
+import static ir.pathlens.camera.Constants.SRC_IP_ADDRESS_FIELD_INDEX;
+import static ir.pathlens.camera.Constants.TIMESTAMP_FIELD_INDEX;
 
+import ir.pathlens.proto.CameraLogProto;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
-
-import static ir.pathlens.camera.Constants.*;
-import static ir.pathlens.camera.Constants.IpVersion.IPV4;
-import static ir.pathlens.camera.Constants.IpVersion.IPV6;
 
 /**
  * Generates a random {@link  CameraLogProto} Log.

@@ -14,6 +14,9 @@ public class Constants {
     public static final int PHONE_NUMBER_FIELD_INDEX = 3;
     public static final int IP_VERSION_INDEX = 4;
 
+    /**
+     * Represents IP address versions.
+     */
     public enum IpVersion {
         IPV4("v4"),
         IPV6("v6");

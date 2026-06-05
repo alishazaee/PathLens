@@ -1,9 +1,30 @@
 plugins {
     id 'java-library'
+    id 'checkstyle'
 }
 
 repositories {
     mavenCentral()
+}
+
+tasks.withType(Checkstyle).configureEach {
+    exclude '**/proto/**'
+    exclude '**/protobuf/**'
+}
+dependencies {
+    def log4jVersion = "2.21.0"
+    implementation("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVersion")
+    implementation("org.apache.logging.log4j:log4j-layout-template-json:$log4jVersion")
+
+    configurations.configureEach {
+        exclude group: 'log4j', module: 'log4j'
+        exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+        exclude group: 'org.slf4j', module: 'slf4j-reload4j'
+        exclude group: 'ch.qos.reload4j', module: 'reload4j'
+
+        // We use Log4j2 instead of Spring Boot's default logging.
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
 }
 
 java {

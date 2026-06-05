@@ -2,28 +2,30 @@
 protobuf = "4.33.0"
 jackson = "2.15.2"
 junit = "5.10.0"
-testcontainers = "1.19.3"
+testContainers = "1.21.4"
 kafka = "3.6.1"
 
 [libraries]
-# Protobuf
 protobufJava = { module = "com.google.protobuf:protobuf-java", version.ref = "protobuf" }
 
-# Jackson
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
 jackson-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
 
-# Geo
 geohash = "ch.hsr:geohash:1.4.0"
 
-# JUnit
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 
-# Testcontainers
-testcontainers-core = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
-testcontainers-junit = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
-testcontainers-kafka = { module = "org.testcontainers:kafka", version.ref = "testcontainers" }
+testcontainersJupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testContainers" }
+testcontainersKafka = { module = "org.testcontainers:kafka", version.ref = "testContainers" }
+testcontainersPostgresql = { module = "org.testcontainers:postgresql", version.ref = "testContainers" }
 
-# Kafka
 kafka-clients = { module = "org.apache.kafka:kafka-clients", version.ref = "kafka" }
+
+jakartaWsApi = "jakarta.ws.rs:jakarta.ws.rs-api:3.1.0"
+jakartaValidation = "jakarta.validation:jakarta.validation-api:3.1.0"
+commonsLang = "org.apache.commons:commons-lang3:3.12.0"
+guava = "com.google.guava:guava:32.1.2-jre"
+springDocWebmvc = "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0"
+parallelconsumer = "io.confluent.parallelconsumer:parallel-consumer-core:0.5.3.3"
+

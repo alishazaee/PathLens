@@ -3,7 +3,6 @@ package ir.pathlens.generator;
 import ir.pathlens.camera.Constants.IpVersion;
 import ir.pathlens.proto.RawLogProto.Log;
 import ir.pathlens.proto.RawLogProto.Type;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;

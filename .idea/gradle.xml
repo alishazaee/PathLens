@@ -20,9 +20,16 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/alerting-system" />
+            <option value="$PROJECT_DIR$/alerting-system/model" />
+            <option value="$PROJECT_DIR$/alerting-system/protobuf" />
+            <option value="$PROJECT_DIR$/alerting-system/rest" />
             <option value="$PROJECT_DIR$/buildSrc" />
             <option value="$PROJECT_DIR$/common-libs" />
+            <option value="$PROJECT_DIR$/common-libs/location-utils" />
             <option value="$PROJECT_DIR$/common-libs/log-generator" />
+            <option value="$PROJECT_DIR$/common-libs/postgres-test" />
+            <option value="$PROJECT_DIR$/common-libs/test-extensions" />
             <option value="$PROJECT_DIR$/logs-proto" />
             <option value="$PROJECT_DIR$/logs-proto/camera" />
             <option value="$PROJECT_DIR$/logs-proto/camera/parser" />
