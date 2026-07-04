@@ -1,0 +1,29 @@
+spring:
+  datasource:
+    url: N/A
+    username: N/A
+    password: N/A
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+app:
+  target-logs-source-topic: target-logs
+
+  target-log-consumer:
+    bootstrap-servers: localhost:9092
+    group-id: alerting-group
+    auto-offset-reset: earliest
+    max-concurrency: 3
+    batch-size: 500
+    commit-interval-ms: 1000
+
+    extra-configs:
+      enable.auto.commit: "false"
+      max.poll.records: "500"
+      fetch.min.bytes: "1"
+      fetch.max.wait.ms: "500"

@@ -1,0 +1,27 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
+plugins {
+    id 'java-conventions'
+    id 'org.springframework.boot'
+}
+
+dependencies {
+    // Imports Spring Boot Maven BOM
+    implementation platform(SpringBootPlugin.BOM_COORDINATES)
+    implementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation libs.testcontainersKafka
+    implementation libs.testcontainersPostgresql
+    implementation libs.testcontainersKafka
+
+    runtimeOnly 'org.postgresql:postgresql'
+
+    api libs.testcontainersJupiter
+}
+
+bootJar {
+    enabled = false
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += '-Xlint:-processing'
+}
