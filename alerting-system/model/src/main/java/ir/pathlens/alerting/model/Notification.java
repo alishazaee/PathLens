@@ -8,7 +8,7 @@ import java.util.UUID;
  */
 public record Notification(
         UUID id,
-        LocalDateTime timestamp,
+        LocalDateTime createdAt,
         String message,
         UUID ruleId,
         boolean seen,

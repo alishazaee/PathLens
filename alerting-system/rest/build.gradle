@@ -18,8 +18,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-    annotationProcessor 'org.projectlombok:lombok:1.18.38'
-    compileOnly 'org.projectlombok:lombok:1.18.38'
+    annotationProcessor libs.lombok
+    compileOnly libs.lombok
 
     // Todo try to remove it with api in gradle
     implementation project(':alerting-system:model')
@@ -40,15 +40,17 @@ dependencies {
     implementation libs.parallelconsumer
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
+    testImplementation libs.junit.jupiter
 
-    testCompileOnly 'org.projectlombok:lombok:1.18.32'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.32'
+    testCompileOnly libs.lombok
+    testAnnotationProcessor libs.lombok
 
+    testImplementation project(':alerting-system:client')
     testImplementation libs.testcontainersKafka
     testImplementation project(':common-libs:test-extensions')
     testImplementation project(':logs-proto:camera:proto')
     testImplementation libs.testcontainersJupiter
+    testRuntimeOnly 'javax.xml.bind:jaxb-api:2.3.1'
 }
 
 bootJar {

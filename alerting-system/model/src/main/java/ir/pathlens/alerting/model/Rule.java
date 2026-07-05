@@ -14,6 +14,7 @@ public record Rule(
         IdentityWrapper identity,
         boolean isActive,
         RuleType ruleType,
-        boolean isViolated
+        boolean isViolated,
+        LocalDateTime createdAt
 ) {}
 

@@ -4,6 +4,7 @@ import ir.pathlens.alerting.model.IdentityWrapper;
 import ir.pathlens.alerting.model.Rule;
 import ir.pathlens.alerting.model.RuleCreateDto;
 import ir.pathlens.alerting.rest.entity.RuleEntity;
+import java.time.temporal.ChronoUnit;
 
 /**
  * Mapper for rule models.
@@ -20,7 +21,7 @@ public class RuleMapper {
                         rule.identity().identityValue()
                 )
         );
-        ruleEntity.setExpiresAt(rule.expiresAt());
+        ruleEntity.setExpiresAt(rule.expiresAt().truncatedTo(ChronoUnit.MICROS));
         ruleEntity.setRuleType(rule.ruleType());
 
         return ruleEntity;
@@ -31,11 +32,16 @@ public class RuleMapper {
                 rule.getId(),
                 rule.getTitle(),
                 rule.getGeometryWkt(),
-                rule.getExpiresAt(),
+                truncateToMicros(rule.getExpiresAt()),
                 new IdentityWrapper(rule.getIdentity().identityType(), rule.getIdentity().identityValue()),
                 rule.isActive(),
                 rule.getRuleType(),
-                rule.isViolated()
+                rule.isViolated(),
+                truncateToMicros(rule.getCreatedAt())
         );
+    }
+
+    private static java.time.LocalDateTime truncateToMicros(java.time.LocalDateTime dateTime) {
+        return dateTime.truncatedTo(ChronoUnit.MICROS);
     }
 }

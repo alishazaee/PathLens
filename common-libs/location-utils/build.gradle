@@ -4,5 +4,5 @@ plugins {
 }
 
 dependencies {
-    implementation 'org.locationtech.jts:jts-core:1.20.0'
+    implementation libs.jts.core
 }

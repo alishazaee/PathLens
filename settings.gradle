@@ -26,4 +26,3 @@ rootDir.eachDirRecurse { dir ->
         include(projectPath)
     }
 }
-include 'common-libs:postgres-test'
