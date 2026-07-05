@@ -29,7 +29,7 @@ public record RuleCreateDto(
 ) {
 
     public RuleCreateDto {
-        if (title.isEmpty()) {
+        if (title == null || title.isEmpty()) {
             title = "NO NAME";
         }
     }

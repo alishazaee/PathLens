@@ -19,7 +19,7 @@ app:
     group-id: alerting-group
     auto-offset-reset: earliest
     max-concurrency: 3
-    batch-size: 500
+    batch-size: 10
     commit-interval-ms: 1000
 
     extra-configs:

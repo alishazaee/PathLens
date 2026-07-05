@@ -8,11 +8,13 @@ import ir.pathlens.alerting.rest.service.RuleService;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -28,6 +30,7 @@ public class RuleController {
     }
 
     @PostMapping(ApiPathConstants.CREATE_RULE_PATH)
+    @ResponseStatus(HttpStatus.CREATED)
     public Rule createRule(@RequestBody RuleCreateDto rule) {
         return ruleService.createRule(rule);
     }

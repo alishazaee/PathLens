@@ -11,9 +11,12 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -44,9 +47,11 @@ public class RuleEntity {
     private UUID id;
 
     @NotNull
+    @Column(name = "title")
     private String title;
 
     @NotNull
+    @Column(name = "geometry_wkt")
     private String geometryWkt;
 
     @CreatedDate
@@ -64,6 +69,7 @@ public class RuleEntity {
     @Embedded
     private IdentityWrapper identity;
 
+    @Column(name = "is_active")
     private boolean isActive = true;
 
     @NotNull
@@ -72,5 +78,23 @@ public class RuleEntity {
     private RuleType ruleType;
 
     @NotNull
+    @Column(name = "is_violated")
     private boolean isViolated;
+
+    /**
+     * Ensures all timestamps are stored with second precision.
+     */
+    @PrePersist
+    @PreUpdate
+    private void truncateTimestampsToSeconds() {
+        if (createdAt != null) {
+            createdAt = createdAt.truncatedTo(ChronoUnit.SECONDS);
+        }
+        if (updatedAt != null) {
+            updatedAt = updatedAt.truncatedTo(ChronoUnit.SECONDS);
+        }
+        if (expiresAt != null) {
+            expiresAt = expiresAt.truncatedTo(ChronoUnit.SECONDS);
+        }
+    }
 }

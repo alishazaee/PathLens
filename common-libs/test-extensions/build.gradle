@@ -11,7 +11,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-test'
     implementation libs.testcontainersKafka
     implementation libs.testcontainersPostgresql
-    implementation libs.testcontainersKafka
 
     runtimeOnly 'org.postgresql:postgresql'
 

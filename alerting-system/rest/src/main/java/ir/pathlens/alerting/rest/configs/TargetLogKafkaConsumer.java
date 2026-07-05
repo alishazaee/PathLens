@@ -23,6 +23,7 @@ public class TargetLogKafkaConsumer {
         ParallelConsumerOptions<byte[], byte[]> options =
                 ParallelConsumerOptions.<byte[], byte[]>builder()
                         .consumer(consumer)
+                        .ordering(ParallelConsumerOptions.ProcessingOrder.UNORDERED)
                         .maxConcurrency(kafkaConsumerConfig.maxConcurrency())
                         .batchSize(kafkaConsumerConfig.batchSize())
                         .commitInterval(Duration.ofMillis(kafkaConsumerConfig.commitIntervalMs()))
@@ -36,6 +37,8 @@ public class TargetLogKafkaConsumer {
 
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, config.bootstrapServers());
         props.put(ConsumerConfig.GROUP_ID_CONFIG, config.groupId());
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, config.autoOffsetReset());
+
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
                 "org.apache.kafka.common.serialization.ByteArrayDeserializer");
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,

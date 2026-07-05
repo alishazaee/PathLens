@@ -16,10 +16,10 @@ import ir.pathlens.alerting.rest.configs.ApplicationConfig;
 import ir.pathlens.alerting.rest.repository.LogRepository;
 import ir.pathlens.alerting.rest.repository.NotificationRepository;
 import ir.pathlens.alerting.rest.repository.RuleRepository;
+import ir.pathlens.alerting.rest.util.CommonConfigs;
 import ir.pathlens.alerting.rest.util.TargetLogRandomGenerator;
 import ir.pathlens.extension.kafka.KafkaExtension;
 import ir.pathlens.extension.postgresql.PostgresqlExtension;
-import ir.pathlens.extension.postgresql.SpringCommonPostgresConfigs;
 import ir.pathlens.proto.TargetLogProto.TargetLog;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,13 +40,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith({PostgresqlExtension.class, KafkaExtension.class})
-class TargetLogBatchPersisterTest extends SpringCommonPostgresConfigs {
+class TargetLogBatchPersisterTest extends CommonConfigs {
     private static UUID ENTER_VIOLATION_RULE_ID;
     private static UUID EXIT_VIOLATION_RULE_ID;
     private static UUID EXPIRED_RULE_ID;
@@ -68,11 +66,6 @@ class TargetLogBatchPersisterTest extends SpringCommonPostgresConfigs {
     private NotificationRepository notificationRepository;
     @Autowired
     private ApplicationConfig config;
-
-    @DynamicPropertySource
-    static void registerKafkaProperties(DynamicPropertyRegistry registry) {
-        registry.add("app.target-log-consumer.bootstrap-servers", getKafkaContainer()::getBootstrapServers);
-    }
 
     @BeforeEach
     void setup() {

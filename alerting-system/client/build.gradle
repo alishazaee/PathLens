@@ -1,0 +1,9 @@
+plugins {
+    id("java-conventions")
+}
+
+dependencies {
+    api project(':alerting-system:model')
+    api project(':common-libs:common-exceptions')
+    api libs.bundles.jerseyClient
+}

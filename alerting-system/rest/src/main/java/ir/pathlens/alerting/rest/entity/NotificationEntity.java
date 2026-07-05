@@ -9,9 +9,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -50,4 +53,15 @@ public class NotificationEntity {
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    /**
+     * Ensures all timestamps are stored with second precision.
+     */
+    @PrePersist
+    @PreUpdate
+    private void truncateTimestampsToSeconds() {
+        if (createdAt != null) {
+            createdAt = createdAt.truncatedTo(ChronoUnit.SECONDS);
+        }
+    }
 }
