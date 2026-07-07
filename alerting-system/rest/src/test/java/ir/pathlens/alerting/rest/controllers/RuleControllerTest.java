@@ -110,10 +110,10 @@ class RuleControllerTest extends CommonConfigs {
     public void testIdenticalIdentitiesInCache() {
         ResponseEntity<Rule> phoneRuleEnter = createNewRule(phoneWktGeometry, phoneIdentity, RuleType.Enter);
         ResponseEntity<Rule> phoneRuleExit = createNewRule(phoneWktGeometry, phoneIdentity, RuleType.Exit);
-        try (RulesCache cache = new RulesCache(rulesClient, 10, 100)) {{
+        try (RulesCache cache = new RulesCache(rulesClient, 10, 100)) {
             cache.submitBackgroundTask();
             assertCacheContainsBothIdentities(cache, phoneRuleEnter, phoneRuleExit);
-        }}
+        }
     }
 
     @Test

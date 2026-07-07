@@ -14,6 +14,7 @@ import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -27,6 +28,8 @@ public class RulesClient implements AutoCloseable {
         this.baseUrl = baseUrl;
         this.client = ClientBuilder.newBuilder()
                 .register(JacksonFeature.class)
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS)
                 .build();
     }
 

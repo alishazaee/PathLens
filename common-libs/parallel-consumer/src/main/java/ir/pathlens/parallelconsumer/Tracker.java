@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
@@ -21,16 +20,19 @@ public class Tracker<K, V> {
         this.consumer = consumer;
     }
 
-    public void track(ConsumerRecord<K, V> record) {
-        TopicPartition topicPartition = new TopicPartition(record.topic(), record.partition());
+    public void track(OffsetPartition offsetPartition) {
+        TopicPartition topicPartition = offsetPartition.topicPartition();
         partitionTracker.computeIfAbsent(topicPartition, tp -> new PartitionTracker())
-                .register(record.offset());
+                .register(offsetPartition.offset());
     }
 
-    public void complete(ConsumerRecord<K, V> record) {
-        TopicPartition topicPartition = new TopicPartition(record.topic(), record.partition());
+    public void complete(OffsetPartition offsetPartition) {
+        TopicPartition topicPartition = offsetPartition.topicPartition();
         PartitionTracker tracker = partitionTracker.get(topicPartition);
-        Optional<Long> commitOffset = tracker.complete(record.offset());
+        if (tracker == null) {
+            return;
+        }
+        Optional<Long> commitOffset = tracker.complete(offsetPartition.offset());
         if (commitOffset.isPresent()) {
             consumer.commitAsync(Map.of(topicPartition, new OffsetAndMetadata(commitOffset.get() + 1)), null);
         }

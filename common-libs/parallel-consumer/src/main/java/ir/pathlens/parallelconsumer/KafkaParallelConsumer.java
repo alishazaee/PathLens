@@ -3,6 +3,7 @@ package ir.pathlens.parallelconsumer;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -27,10 +28,9 @@ public class KafkaParallelConsumer<K, V> implements AutoCloseable {
 
     private final KafkaConsumer<K, V> consumer;
     private final BlockingDeque<ConsumerRecord<K, V>> polledRecords;
-    private final BlockingDeque<ConsumerRecord<K, V>> ackedRecordsQueue;
+    private final BlockingDeque<OffsetPartition> ackedRecordsQueue;
     private final Duration pollTimeout;
     private final Tracker<K, V> tracker;
-    private final String topic;
     private volatile boolean running;
     private Thread pollThread;
 
@@ -41,13 +41,13 @@ public class KafkaParallelConsumer<K, V> implements AutoCloseable {
         consumer = new KafkaConsumer<>(builder.properties);
         running = true;
         tracker = new Tracker<>(consumer);
-        this.topic = builder.topic;
     }
 
     /**
      * Starts the background polling thread and subscribes to the configured topic.
      */
-    public void start() {
+    public void start(String topic) {
+        Validate.notNull(topic, "topic can not be null");
         consumer.subscribe(Collections.singleton(topic), new ConsumerRebalanceListener() {
             @Override
             public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
@@ -71,15 +71,15 @@ public class KafkaParallelConsumer<K, V> implements AutoCloseable {
     /**
      * Returns the next available record from the polled queue, or null if empty.
      */
-    public ConsumerRecord<K, V> poll() {
-        return polledRecords.poll();
+    public Optional<ConsumerRecord<K, V>> poll() {
+        return Optional.ofNullable(polledRecords.poll());
     }
 
     /**
      * Marks a record as processed so its offset can be committed.
      */
-    public void ack(ConsumerRecord<K, V> record) {
-        ackedRecordsQueue.add(record);
+    public void ack(OffsetPartition offsetPartition) {
+        ackedRecordsQueue.add(offsetPartition);
     }
 
 
@@ -97,10 +97,14 @@ public class KafkaParallelConsumer<K, V> implements AutoCloseable {
             while (running) {
                 try {
                     ConsumerRecords<K, V> records = consumer.poll(pollTimeout);
+                    drainCommittedMessages();
                     for (ConsumerRecord<K, V> record : records) {
-                        tracker.track(record);
-                        drainCommittedMessages();
+                        TopicPartition topicPartition = new TopicPartition(record.topic(), record.partition());
+                        tracker.track(new OffsetPartition(topicPartition, record.offset()));
                         while (!polledRecords.offer(record)) {
+                            if (!running) {
+                                break;
+                            }
                             drainCommittedMessages();
                             Thread.sleep(1);
                         }
@@ -119,9 +123,9 @@ public class KafkaParallelConsumer<K, V> implements AutoCloseable {
     }
 
     private void drainCommittedMessages() {
-        ConsumerRecord<K, V> record;
-        while ((record = ackedRecordsQueue.poll()) != null) {
-            tracker.complete(record);
+        OffsetPartition offsetParition;
+        while ((offsetParition = ackedRecordsQueue.poll()) != null) {
+            tracker.complete(offsetParition);
         }
     }
 
@@ -132,14 +136,13 @@ public class KafkaParallelConsumer<K, V> implements AutoCloseable {
         private Properties properties;
         private int queueSize;
         private Duration pollTimeout = DEFAULT_POLL_TIMEOUT;
-        private String topic;
 
         public Builder<K, V> withProperties(Properties properties) {
             if (properties == null) {
                 throw new IllegalArgumentException("properties must not be null");
             }
             this.properties = properties;
-            this.properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");;
+            this.properties.putIfAbsent(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
             return this;
         }
 
@@ -148,11 +151,6 @@ public class KafkaParallelConsumer<K, V> implements AutoCloseable {
                 throw new IllegalArgumentException("queueSize must be positive, got: " + queueSize);
             }
             this.queueSize = queueSize;
-            return this;
-        }
-
-        public Builder<K, V> withTopic(String topic) {
-            this.topic = topic;
             return this;
         }
 
@@ -166,7 +164,6 @@ public class KafkaParallelConsumer<K, V> implements AutoCloseable {
 
         public KafkaParallelConsumer<K, V> build() {
             Validate.notNull(properties, "properties must not be null");
-            Validate.notNull(topic, "topic can not be null");
             Validate.isTrue(queueSize > 0, "queueSize must be positive");
             return new KafkaParallelConsumer<>(this);
         }

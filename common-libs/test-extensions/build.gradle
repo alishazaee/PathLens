@@ -15,6 +15,7 @@ dependencies {
     api libs.testcontainersPostgresql
     api libs.testcontainersKafka
     api libs.testcontainersJupiter
+    api "org.apache.kafka:kafka-clients:${libs.versions.kafka.get()}"
 }
 
 bootJar {

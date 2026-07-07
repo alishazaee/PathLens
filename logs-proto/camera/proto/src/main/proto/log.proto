@@ -31,8 +31,8 @@ message Device {
 }
 
 message Location {
-    float latitude = 1;
-    float longitude = 2;
+    double latitude = 1;
+    double longitude = 2;
     string site_id = 3;
     string city = 4;
     string country = 5;
