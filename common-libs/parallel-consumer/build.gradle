@@ -1,0 +1,11 @@
+plugins {
+    id("java-conventions")
+    id("junit5-conventions")
+}
+
+dependencies {
+    implementation("org.apache.kafka:kafka-clients:4.1.0")
+    implementation(libs.commonsLang)
+    testImplementation(project(":common-libs:test-extensions"))
+    testImplementation(project(":common-libs:log-generator"))
+}

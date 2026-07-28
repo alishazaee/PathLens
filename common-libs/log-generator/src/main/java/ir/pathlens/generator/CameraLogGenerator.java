@@ -106,35 +106,7 @@ public class CameraLogGenerator {
         return this;
     }
 
-    public static String randomIpv4() {
-        byte[] bytes = new byte[4];
-        ThreadLocalRandom.current().nextBytes(bytes);
-        try {
-            return InetAddress.getByAddress(bytes).getHostAddress();
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static String randomIpv6() {
-        byte[] bytes = new byte[16];
-        ThreadLocalRandom.current().nextBytes(bytes);
-        try {
-            return InetAddress.getByAddress(bytes).getHostAddress();
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static String randomPhoneNumber() {
-        StringBuilder numberInStr = new StringBuilder("+98");
-        for (int i = 0; i < 10; i++) {
-            numberInStr.append(ThreadLocalRandom.current().nextInt(0, 10));
-        }
-        return numberInStr.toString();
-    }
-
-    public CameraLogProto.Log.Builder generateLogProto() {
+    public CameraLogProto.Log.Builder generateLogBuilder() {
         CameraLogProto.Log.Builder log = CameraLogProto.Log.newBuilder()
                 .setTimestamp(timestamp)
                 .setPlateNumber(plateNumber)
@@ -162,5 +134,33 @@ public class CameraLogGenerator {
         fields[IP_VERSION_INDEX] = String.valueOf(ipVersion.getValue());
         return String.join("|", fields);
 
+    }
+
+    private static String randomIpv4() {
+        byte[] bytes = new byte[4];
+        ThreadLocalRandom.current().nextBytes(bytes);
+        try {
+            return InetAddress.getByAddress(bytes).getHostAddress();
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static String randomIpv6() {
+        byte[] bytes = new byte[16];
+        ThreadLocalRandom.current().nextBytes(bytes);
+        try {
+            return InetAddress.getByAddress(bytes).getHostAddress();
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static String randomPhoneNumber() {
+        StringBuilder numberInStr = new StringBuilder("+98");
+        for (int i = 0; i < 10; i++) {
+            numberInStr.append(ThreadLocalRandom.current().nextInt(0, 10));
+        }
+        return numberInStr.toString();
     }
 }

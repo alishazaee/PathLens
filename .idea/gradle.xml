@@ -30,6 +30,7 @@
             <option value="$PROJECT_DIR$/common-libs/common-exceptions" />
             <option value="$PROJECT_DIR$/common-libs/location-utils" />
             <option value="$PROJECT_DIR$/common-libs/log-generator" />
+            <option value="$PROJECT_DIR$/common-libs/parallel-consumer" />
             <option value="$PROJECT_DIR$/common-libs/test-extensions" />
             <option value="$PROJECT_DIR$/logs-proto" />
             <option value="$PROJECT_DIR$/logs-proto/camera" />
