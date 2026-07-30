@@ -9,11 +9,11 @@ dependencies {
     // Imports Spring Boot Maven BOM
     implementation platform(SpringBootPlugin.BOM_COORDINATES)
     implementation 'org.springframework.boot:spring-boot-starter-test'
-    implementation libs.testcontainersKafka
-    implementation libs.testcontainersPostgresql
 
     runtimeOnly 'org.postgresql:postgresql'
 
+    api libs.testcontainersPostgresql
+    api libs.testcontainersKafka
     api libs.testcontainersJupiter
 }
 

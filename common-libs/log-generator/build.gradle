@@ -5,5 +5,6 @@ plugins {
 
 dependencies {
     api(project(":logs-proto:raw-log:proto"))
+    api(project(":logs-proto:camera:proto"))
     implementation(project(":logs-proto:camera:parser"))
 }
