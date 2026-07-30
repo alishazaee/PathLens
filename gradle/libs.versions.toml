@@ -8,6 +8,7 @@ jersey = "3.1.7"
 lombok = "1.18.38"
 jts = "1.20.0"
 log4j = "2.21.0"
+jedis = "5.1.0"
 
 [libraries]
 protobufJava = { module = "com.google.protobuf:protobuf-java", version.ref = "protobuf" }
@@ -45,6 +46,7 @@ jts-core = { module = "org.locationtech.jts:jts-core", version.ref = "jts" }
 
 log4j-slf4j2-impl = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j" }
 log4j-layout-template-json = { module = "org.apache.logging.log4j:log4j-layout-template-json", version.ref = "log4j" }
+jedis = { module = "redis.clients:jedis", version.ref = "jedis" }
 
 [bundles]
 jerseyClient = ["jersey-client", "jersey-media-json-jackson", "jersey-hk2", "jackson-jaxrs-json-provider", "jackson-datatype-jsr310"]

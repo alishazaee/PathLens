@@ -89,6 +89,7 @@ public class RulesCache implements AutoCloseable {
             executor.shutdownNow();
             Thread.currentThread().interrupt();
         }
+        client.close();
     }
 
     private void runSyncLoop() {

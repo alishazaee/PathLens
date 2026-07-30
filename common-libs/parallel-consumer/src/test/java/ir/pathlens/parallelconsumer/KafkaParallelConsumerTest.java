@@ -10,6 +10,7 @@ import ir.pathlens.proto.CameraLogProto;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -17,6 +18,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -39,10 +41,9 @@ class KafkaParallelConsumerTest {
             try (KafkaParallelConsumer<byte[], byte[]> consumer = new KafkaParallelConsumer.Builder<byte[], byte[]>()
                             .withPollTimeout(Duration.ofMillis(5))
                             .withQueueSize(10)
-                            .withTopic("test-1")
                             .withProperties(createKafkaConsumer("testy-1"))
                             .build()) {
-                consumer.start();
+                consumer.start("test-1");
                 CameraLogProto.Log log1 = CameraLogGenerator.randomLog().generateLogBuilder().build();
                 CameraLogProto.Log log2 = CameraLogGenerator.randomLog().generateLogBuilder().build();
                 sendRecord(new ProducerRecord<>("test-1", log1.toByteArray()));
@@ -52,10 +53,14 @@ class KafkaParallelConsumerTest {
                 Awaitility.await()
                         .atMost(Duration.ofSeconds(10))
                         .untilAsserted(() -> {
-                            ConsumerRecord<byte[], byte[]> record = consumer.poll();
-                            if (record != null) {
-                                logs.add(CameraLogProto.Log.parseFrom(record.value()));
-                                consumer.ack(record);
+                            Optional<ConsumerRecord<byte[], byte[]>> record = consumer.poll();
+                            if (record.isPresent()) {
+                                logs.add(CameraLogProto.Log.parseFrom(record.get().value()));
+                                TopicPartition topicPartition =
+                                        new TopicPartition(record.get().topic(), record.get().partition());
+                                OffsetPartition offsetPartition =
+                                        new OffsetPartition(topicPartition, record.get().offset());
+                                consumer.ack(offsetPartition);
                             }
                             assertEquals(2, logs.size());
                         });
@@ -70,22 +75,25 @@ class KafkaParallelConsumerTest {
         try (KafkaParallelConsumer<byte[], byte[]> consumer = new KafkaParallelConsumer.Builder<byte[], byte[]>()
                 .withPollTimeout(Duration.ofMillis(5))
                 .withQueueSize(5)
-                .withTopic("test-2")
                 .withProperties(createKafkaConsumer("testy-2"))
                 .build()) {
             for (int i = 0; i < 50; i++) {
                 CameraLogProto.Log log = CameraLogGenerator.randomLog().generateLogBuilder().build();
                 sendRecord(new ProducerRecord<>("test-2", log.toByteArray()));
             }
-            consumer.start();
+            consumer.start("test-2");
             List<CameraLogProto.Log> logs = new ArrayList<>();
             Awaitility.await()
                     .atMost(Duration.ofSeconds(10))
                     .untilAsserted(() -> {
-                        ConsumerRecord<byte[], byte[]> record = consumer.poll();
-                        if (record != null) {
-                            logs.add(CameraLogProto.Log.parseFrom(record.value()));
-                            consumer.ack(record);
+                        Optional<ConsumerRecord<byte[], byte[]>> record = consumer.poll();
+                        if (record.isPresent()) {
+                            logs.add(CameraLogProto.Log.parseFrom(record.get().value()));
+                            TopicPartition topicPartition =
+                                    new TopicPartition(record.get().topic(), record.get().partition());
+                            OffsetPartition offsetPartition =
+                                    new OffsetPartition(topicPartition, record.get().offset());
+                            consumer.ack(offsetPartition);
                         }
                         assertEquals(50, logs.size());
                     });

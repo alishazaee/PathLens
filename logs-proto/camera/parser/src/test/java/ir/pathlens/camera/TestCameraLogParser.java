@@ -1,20 +1,32 @@
 package ir.pathlens.camera;
 
-import ir.pathlens.generator.RawLogGenerator;
-import ir.pathlens.proto.CameraLogProto;
-import ir.pathlens.proto.RawLogProto;
-import org.junit.jupiter.api.Test;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import static ir.pathlens.camera.Constants.*;
-import static ir.pathlens.proto.CameraLogProto.Error.*;
+import static ir.pathlens.camera.Constants.DELIMITER;
+import static ir.pathlens.camera.Constants.IpVersion;
+import static ir.pathlens.camera.Constants.PHONE_NUMBER_FIELD_INDEX;
+import static ir.pathlens.camera.Constants.PLATE_NUMBER_INDEX;
+import static ir.pathlens.camera.Constants.SRC_IP_ADDRESS_FIELD_INDEX;
+import static ir.pathlens.camera.Constants.TIMESTAMP_FIELD_INDEX;
+import static ir.pathlens.proto.CameraLogProto.Error.INVALID_PHONE_NUMBER;
+import static ir.pathlens.proto.CameraLogProto.Error.INVALID_PLATE_NUMBER;
+import static ir.pathlens.proto.CameraLogProto.Error.INVALID_SRC_IPV4;
+import static ir.pathlens.proto.CameraLogProto.Error.INVALID_SRC_IPV6;
+import static ir.pathlens.proto.CameraLogProto.Error.INVALID_TIMESTAMP;
+import static ir.pathlens.proto.CameraLogProto.Error.RECORD_SIZE_INCORRECT;
 import static ir.pathlens.proto.CameraLogProto.ErrorType.HARD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ir.pathlens.generator.RawLogGenerator;
+import ir.pathlens.proto.CameraLogProto;
+import ir.pathlens.proto.RawLogProto;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import org.junit.jupiter.api.Test;
+
+/**
+ * Tests for {@link CameraLogParser}.
+ */
 public class TestCameraLogParser {
 
     @Test

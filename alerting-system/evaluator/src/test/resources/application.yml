@@ -1,0 +1,18 @@
+kafkaConsumerConfig:
+  bootstrapServers: "N/A"
+  autoOffsetReset: "earliest"
+  queueSize: 10
+  groupId: "evaluator-test"
+  extraConfigs: {}
+sourceTopic: "logs-topic"
+destinationTopic: "target-topic"
+kafkaProducerConfig:
+  extraConfigs: {}
+  bootstrapServers: "N/A"
+maxConcurrency: 5
+threadCount: 5
+prometheusPortNumber: 3006
+rulesCacheConfig:
+  baseUrl: "N/A"
+  minInitialDelayInMillis: 10
+  maxInitialDelayInMillis: 50

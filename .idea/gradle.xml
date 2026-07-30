@@ -22,6 +22,7 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/alerting-system" />
             <option value="$PROJECT_DIR$/alerting-system/client" />
+            <option value="$PROJECT_DIR$/alerting-system/evaluator" />
             <option value="$PROJECT_DIR$/alerting-system/model" />
             <option value="$PROJECT_DIR$/alerting-system/protobuf" />
             <option value="$PROJECT_DIR$/alerting-system/rest" />
