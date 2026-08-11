@@ -10,34 +10,26 @@ dependencies {
     // Imports Spring Boot Maven BOM
     implementation platform(SpringBootPlugin.BOM_COORDINATES)
 
-    implementation libs.jakartaWsApi
-
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+
+    implementation project(':alerting-system:model')
+    implementation project(':alerting-system:alert-db')
+    implementation project(':common-libs:common-model')
 
     annotationProcessor libs.lombok
     compileOnly libs.lombok
 
-    // Todo try to remove it with api in gradle
-    implementation project(':alerting-system:model')
-
-    implementation libs.guava
     implementation libs.springDocWebmvc
 
     implementation 'io.micrometer:micrometer-registry-prometheus'
 
     runtimeOnly 'org.postgresql:postgresql'
 
-    implementation project(':logs-proto:camera:proto')
-    implementation project(':alerting-system:protobuf')
     implementation project(':common-libs:location-utils')
-    implementation("org.flywaydb:flyway-core")
-    implementation("org.flywaydb:flyway-database-postgresql")
-
-    implementation libs.parallelconsumer
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation libs.junit.jupiter
@@ -46,17 +38,6 @@ dependencies {
     testAnnotationProcessor libs.lombok
 
     testImplementation project(':alerting-system:client')
-    testImplementation libs.testcontainersKafka
     testImplementation project(':common-libs:test-extensions')
-    testImplementation project(':logs-proto:camera:proto')
-    testImplementation libs.testcontainersJupiter
     testRuntimeOnly 'javax.xml.bind:jaxb-api:2.3.1'
-}
-
-bootJar {
-    enabled = false
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs += '-Xlint:-processing'
 }

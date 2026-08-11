@@ -8,20 +8,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ir.pathlens.GeometryUtils;
 import ir.pathlens.alerting.model.IdentityType;
 import ir.pathlens.alerting.model.IdentityWrapper;
-import ir.pathlens.alerting.model.RuleCreateDto;
 import ir.pathlens.alerting.model.RuleType;
-import ir.pathlens.alerting.rest.entity.LogEntity;
-import ir.pathlens.alerting.rest.entity.RuleEntity;
-import ir.pathlens.alerting.rest.mappers.RuleMapper;
-import ir.pathlens.alerting.rest.repository.LogRepository;
-import ir.pathlens.alerting.rest.repository.RuleRepository;
-import ir.pathlens.alerting.rest.util.CommonConfigs;
-import ir.pathlens.extension.kafka.KafkaExtension;
+import ir.pathlens.alerting.rest.util.ControllerTestBase;
+import ir.pathlens.alerting.rest.util.TestData;
 import ir.pathlens.extension.postgresql.PostgresqlExtension;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import org.jooq.DSLContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,60 +27,38 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.JdkClientHttpRequestFactory;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ExtendWith({PostgresqlExtension.class, KafkaExtension.class})
-class LogControllerTest extends CommonConfigs {
+@ExtendWith(PostgresqlExtension.class)
+@SuppressWarnings("unchecked")
+class LogControllerTest extends ControllerTestBase {
 
     @Autowired
     private TestRestTemplate restTemplate;
     @Autowired
-    private RuleRepository ruleRepository;
-    @Autowired
-    private LogRepository logRepository;
+    private DSLContext dsl;
 
-    private RuleEntity savedRule;
+    private UUID ruleId;
 
     @BeforeEach
     void setup() {
-        logRepository.deleteAll();
-        ruleRepository.deleteAll();
-        restTemplate.getRestTemplate().setRequestFactory(new JdkClientHttpRequestFactory());
-        savedRule = ruleRepository.save(RuleMapper.fromDto(
-                new RuleCreateDto(
-                        "test-rule",
-                        GeometryUtils.createRandomWkt(),
-                        LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.SECONDS),
-                        new IdentityWrapper(IdentityType.PhoneNumber, "09120000000"),
-                        RuleType.Enter
-                )));
+        TestData.clearAll(dsl);
+        ruleId = TestData.insertRule(dsl, "test-rule", GeometryUtils.createRandomWkt(),
+                LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                new IdentityWrapper(IdentityType.PhoneNumber, "09120000000"), RuleType.Enter, true);
     }
 
     @AfterEach
     void cleanUp() {
-        logRepository.deleteAll();
-        ruleRepository.deleteAll();
+        TestData.clearAll(dsl);
     }
 
     @Test
     void testSearchLogsWithoutFilter() {
-        LogEntity violatedLog = new LogEntity();
-        violatedLog.setRule(savedRule);
-        violatedLog.setViolated(true);
-        violatedLog.setLatitude(35.5);
-        violatedLog.setLongitude(51.5);
-        logRepository.save(violatedLog);
+        TestData.insertLog(dsl, ruleId, 35.5, 51.5, true);
+        TestData.insertLog(dsl, ruleId, 36.0, 52.0, false);
 
-        LogEntity nonViolatedLog = new LogEntity();
-        nonViolatedLog.setRule(savedRule);
-        nonViolatedLog.setViolated(false);
-        nonViolatedLog.setLatitude(36.0);
-        nonViolatedLog.setLongitude(52.0);
-        logRepository.save(nonViolatedLog);
-
-        ResponseEntity<Map> response = restTemplate.getForEntity(
-                SEARCH_TARGET_LOGS_PATH, Map.class);
+        ResponseEntity<Map> response = restTemplate.getForEntity(SEARCH_TARGET_LOGS_PATH, Map.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         Map<String, Object> body = response.getBody();
         assertNotNull(body);
@@ -93,19 +67,8 @@ class LogControllerTest extends CommonConfigs {
 
     @Test
     void testSearchLogsWithViolationFilter() {
-        LogEntity violatedLog = new LogEntity();
-        violatedLog.setRule(savedRule);
-        violatedLog.setViolated(true);
-        violatedLog.setLatitude(35.5);
-        violatedLog.setLongitude(51.5);
-        logRepository.save(violatedLog);
-
-        LogEntity nonViolatedLog = new LogEntity();
-        nonViolatedLog.setRule(savedRule);
-        nonViolatedLog.setViolated(false);
-        nonViolatedLog.setLatitude(36.0);
-        nonViolatedLog.setLongitude(52.0);
-        logRepository.save(nonViolatedLog);
+        TestData.insertLog(dsl, ruleId, 35.5, 51.5, true);
+        TestData.insertLog(dsl, ruleId, 36.0, 52.0, false);
 
         String url = SEARCH_TARGET_LOGS_PATH + "?isViolated=true";
         ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
@@ -120,19 +83,39 @@ class LogControllerTest extends CommonConfigs {
         assertTrue((Boolean) log.get("isViolated"));
         assertEquals(35.5, log.get("latitude"));
         assertEquals(51.5, log.get("longitude"));
-        assertEquals(savedRule.getId().toString(), log.get("ruleId"));
+        assertEquals(ruleId.toString(), log.get("ruleId"));
+        assertNotNull(log.get("timestamp"));
+    }
+
+    @Test
+    void testSearchLogsWithPagination() {
+        TestData.insertLog(dsl, ruleId, 35.5, 51.5, true);
+        TestData.insertLog(dsl, ruleId, 36.0, 52.0, false);
+        TestData.insertLog(dsl, ruleId, 37.0, 53.0, true);
+
+        ResponseEntity<Map> firstPage = restTemplate.getForEntity(
+                SEARCH_TARGET_LOGS_PATH + "?page=0&size=2", Map.class);
+        assertEquals(HttpStatus.OK, firstPage.getStatusCode());
+        Map<String, Object> firstBody = firstPage.getBody();
+        assertNotNull(firstBody);
+        assertEquals(3, firstBody.get("totalElements"));
+        assertEquals(2, firstBody.get("totalPages"));
+        assertEquals(0, firstBody.get("page"));
+        assertEquals(2, ((List<Map<String, Object>>) firstBody.get("content")).size());
+
+        ResponseEntity<Map> secondPage = restTemplate.getForEntity(
+                SEARCH_TARGET_LOGS_PATH + "?page=1&size=2", Map.class);
+        assertEquals(HttpStatus.OK, secondPage.getStatusCode());
+        Map<String, Object> secondBody = secondPage.getBody();
+        assertNotNull(secondBody);
+        assertEquals(1, ((List<Map<String, Object>>) secondBody.get("content")).size());
     }
 
     @Test
     void testSearchLogsWithRuleIdFilter() {
-        LogEntity violatedLog = new LogEntity();
-        violatedLog.setRule(savedRule);
-        violatedLog.setViolated(true);
-        violatedLog.setLatitude(35.5);
-        violatedLog.setLongitude(51.5);
-        logRepository.save(violatedLog);
+        TestData.insertLog(dsl, ruleId, 35.5, 51.5, true);
 
-        String url = SEARCH_TARGET_LOGS_PATH + "?ruleId=" + savedRule.getId();
+        String url = SEARCH_TARGET_LOGS_PATH + "?ruleId=" + ruleId;
         ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         Map<String, Object> body = response.getBody();
@@ -142,7 +125,7 @@ class LogControllerTest extends CommonConfigs {
         assertNotNull(content);
         assertEquals(1, content.size());
         Map<String, Object> log = content.get(0);
-        assertEquals(savedRule.getId().toString(), log.get("ruleId"));
+        assertEquals(ruleId.toString(), log.get("ruleId"));
         assertTrue((Boolean) log.get("isViolated"));
     }
 }

@@ -7,9 +7,11 @@ import io.micrometer.prometheusmetrics.PrometheusConfig;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import io.prometheus.metrics.exporter.httpserver.HTTPServer;
 import ir.pathlens.alerting.evaluator.configs.ApplicationConfig;
+import ir.pathlens.alerting.evaluator.configs.PostgresConfig;
 import ir.pathlens.client.ApiCallException;
 import java.io.IOException;
 import java.nio.file.Path;
+import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +35,8 @@ public class EvaluatorMain {
 
         ApplicationConfig config = loadConfig(Path.of(args[0]));
 
+        migrate(config.postgresConfig());
+
         PrometheusMeterRegistry prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
         CompositeMeterRegistry meterRegistry = new CompositeMeterRegistry();
         meterRegistry.add(prometheusRegistry);
@@ -51,6 +55,20 @@ public class EvaluatorMain {
         }));
 
         evaluator.start();
+    }
+
+    public static void migrate(PostgresConfig config) {
+
+        Flyway flyway = Flyway.configure()
+                .dataSource(
+                        config.getUrl(),
+                        config.getUsername(),
+                        config.getPassword()
+                )
+                .locations("classpath:db/migrations")
+                .load();
+
+        flyway.migrate();
     }
 
     private static HTTPServer createHttpServer(

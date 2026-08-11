@@ -21,14 +21,15 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/alerting-system" />
+            <option value="$PROJECT_DIR$/alerting-system/alert-db" />
             <option value="$PROJECT_DIR$/alerting-system/client" />
             <option value="$PROJECT_DIR$/alerting-system/evaluator" />
             <option value="$PROJECT_DIR$/alerting-system/model" />
-            <option value="$PROJECT_DIR$/alerting-system/protobuf" />
             <option value="$PROJECT_DIR$/alerting-system/rest" />
             <option value="$PROJECT_DIR$/buildSrc" />
             <option value="$PROJECT_DIR$/common-libs" />
             <option value="$PROJECT_DIR$/common-libs/common-exceptions" />
+            <option value="$PROJECT_DIR$/common-libs/common-model" />
             <option value="$PROJECT_DIR$/common-libs/location-utils" />
             <option value="$PROJECT_DIR$/common-libs/log-generator" />
             <option value="$PROJECT_DIR$/common-libs/parallel-consumer" />

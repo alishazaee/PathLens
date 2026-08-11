@@ -9,6 +9,15 @@ destinationTopic: "target-topic"
 kafkaProducerConfig:
   extraConfigs: {}
   bootstrapServers: "N/A"
+postgresConfig:
+  url: "N/A"
+  username: "postgres"
+  password: "postgres"
+  maximumPoolSize: 10
+  minimumIdle: 2
+  connectionTimeoutInMillis: 30000
+  idleTimeoutInMillis: 600000
+  maxLifetimeInMillis: 1800000
 maxConcurrency: 5
 threadCount: 5
 prometheusPortNumber: 3006
@@ -16,3 +25,6 @@ rulesCacheConfig:
   baseUrl: "N/A"
   minInitialDelayInMillis: 10
   maxInitialDelayInMillis: 50
+persisterBatchSize: 100
+persistQueueSize: 1000
+persistBatchTimeOutInMillis: 1000

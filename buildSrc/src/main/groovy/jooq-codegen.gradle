@@ -1,0 +1,73 @@
+import org.flywaydb.core.Flyway
+import org.jooq.codegen.GenerationTool
+import org.jooq.meta.jaxb.Configuration
+import org.jooq.meta.jaxb.Database
+import org.jooq.meta.jaxb.Generator
+import org.jooq.meta.jaxb.Jdbc
+import org.jooq.meta.jaxb.Target
+import org.testcontainers.containers.PostgreSQLContainer
+
+def migrationDir = project.file('src/main/resources/db/migrations')
+def outputDir = project.layout.buildDirectory.dir('generated-jooq')
+
+def generateJooq = tasks.register('generateJooq') {
+    group = 'build'
+    description = 'Applies Flyway migrations to a disposable PostgreSQL container and generates jOOQ classes into build/generated-jooq'
+
+    inputs.dir(migrationDir)
+    outputs.dir(outputDir)
+
+    doLast {
+        PostgreSQLContainer container = new PostgreSQLContainer('postgres:16')
+                .withDatabaseName('pathlens')
+                .withUsername('postgres')
+                .withPassword('postgres')
+
+        container.start()
+        try {
+            String jdbcUrl = container.getJdbcUrl()
+            String user = container.getUsername()
+            String password = container.getPassword()
+
+            Flyway.configure()
+                    .dataSource(jdbcUrl, user, password)
+                    .locations('filesystem:' + migrationDir.absolutePath)
+                    .load()
+                    .migrate()
+
+            def jdbc = new Jdbc(driver: 'org.postgresql.Driver', url: jdbcUrl, user: user, password: password)
+            def database = new Database(
+                    name: 'org.jooq.meta.postgres.PostgresDatabase',
+                    inputSchema: 'public',
+                    excludes: 'flyway_schema_history|log_p[0-9]')
+            def target = new Target(packageName: 'ir.pathlens.alerting.db.jooq', directory: outputDir.get().asFile.absolutePath)
+
+            GenerationTool.generate(new Configuration(jdbc: jdbc, generator: new Generator(database: database, target: target)))
+        } finally {
+            container.stop()
+        }
+    }
+}
+
+sourceSets {
+    main {
+        java.srcDir(outputDir)
+    }
+}
+
+tasks.named('compileJava') {
+    dependsOn generateJooq
+}
+
+// Generated jOOQ sources are not meant to conform to the project checkstyle rules.
+// The generated dir is its own source root, so relative patterns can't match it;
+// exclude by absolute path instead.
+tasks.withType(Checkstyle).configureEach {
+    exclude { element -> element.file.absolutePath.contains('generated-jooq') }
+}
+
+dependencies {
+    api libs.jooq
+    api libs.flyway.core
+    api libs.flyway.database.postgresql
+}

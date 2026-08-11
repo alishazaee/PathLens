@@ -5,3 +5,10 @@ plugins {
 repositories {
     mavenCentral()
 }
+
+dependencies {
+    implementation 'org.jooq:jooq-codegen:3.19.8'
+    implementation 'org.flywaydb:flyway-database-postgresql:10.10.0'
+    implementation 'org.testcontainers:postgresql:1.21.4'
+    runtimeOnly 'org.postgresql:postgresql:42.7.3'
+}

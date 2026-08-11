@@ -1,58 +1,55 @@
 package ir.pathlens.alerting.rest.service;
 
+import static org.jooq.impl.DSL.noCondition;
+
+import ir.pathlens.alerting.db.jooq.tables.TrackedLog;
+import ir.pathlens.alerting.db.jooq.tables.records.TrackedLogRecord;
 import ir.pathlens.alerting.model.LogFilter;
 import ir.pathlens.alerting.model.LogResponse;
-import ir.pathlens.alerting.rest.entity.LogEntity;
-import ir.pathlens.alerting.rest.entity.RuleEntity;
-import ir.pathlens.alerting.rest.filters.LogSpecification;
 import ir.pathlens.alerting.rest.mappers.LogMapper;
-import ir.pathlens.alerting.rest.repository.LogRepository;
-import ir.pathlens.proto.TargetLogProto.TargetLog;
-import jakarta.transaction.Transactional;
+import ir.pathlens.common.model.Page;
 import java.util.List;
-import java.util.Map;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Service for target log operations.
+ * Service for target log operations backed by jOOQ.
  */
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class LogService {
 
-    private final LogRepository logRepository;
+    private final DSLContext dsl;
 
-    public LogService(LogRepository logRepository) {
-        this.logRepository = logRepository;
+    public LogService(DSLContext dsl) {
+        this.dsl = dsl;
     }
 
-    public Page<LogResponse> search(LogFilter filter, Pageable pageable) {
-        return logRepository.findAll(
-                LogSpecification.withFilter(filter),
-                pageable
-        ).map(LogMapper::toDto);
-    }
+    public Page<LogResponse> search(LogFilter filter, int page, int size) {
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.max(size, 1);
 
-    public void createLogs(Map<TargetLog, RuleEntity> targetLogRuleMap) {
+        TrackedLog trackedLog = TrackedLog.TRACKED_LOG;
+        Condition condition = noCondition();
+        if (filter != null) {
+            if (filter.isViolated() != null) {
+                condition = condition.and(trackedLog.IS_VIOLATED.eq(filter.isViolated()));
+            }
+            if (filter.ruleId() != null) {
+                condition = condition.and(trackedLog.RULE_ID.eq(filter.ruleId()));
+            }
+        }
 
-        List<LogEntity> logEntities = targetLogRuleMap.entrySet()
-                .stream()
-                .map(entry -> {
-                    TargetLog targetLog = entry.getKey();
-                    RuleEntity rule = entry.getValue();
+        int total = dsl.fetchCount(trackedLog, condition);
+        List<TrackedLogRecord> records = dsl.selectFrom(trackedLog)
+                .where(condition)
+                .orderBy(TrackedLog.TRACKED_LOG.CREATED_AT)
+                .limit(safeSize)
+                .offset((long) safePage * safeSize)
+                .fetch();
 
-                    LogEntity logEntity = new LogEntity();
-                    logEntity.setRule(rule);
-                    logEntity.setViolated(targetLog.getViolated());
-                    logEntity.setLatitude(targetLog.getLocation().getLatitude());
-                    logEntity.setLongitude(targetLog.getLocation().getLongitude());
-
-                    return logEntity;
-                })
-                .toList();
-
-        logRepository.saveAll(logEntities);
+        return Page.of(records.stream().map(LogMapper::toDto).toList(), safePage, safeSize, total);
     }
 }
