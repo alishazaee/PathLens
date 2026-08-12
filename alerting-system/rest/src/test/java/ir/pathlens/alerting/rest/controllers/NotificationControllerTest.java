@@ -13,21 +13,16 @@ import ir.pathlens.GeometryUtils;
 import ir.pathlens.alerting.model.IdentityType;
 import ir.pathlens.alerting.model.IdentityWrapper;
 import ir.pathlens.alerting.model.Notification;
-import ir.pathlens.alerting.model.RuleCreateDto;
 import ir.pathlens.alerting.model.RuleType;
-import ir.pathlens.alerting.rest.entity.NotificationEntity;
-import ir.pathlens.alerting.rest.entity.RuleEntity;
-import ir.pathlens.alerting.rest.mappers.RuleMapper;
-import ir.pathlens.alerting.rest.repository.NotificationRepository;
-import ir.pathlens.alerting.rest.repository.RuleRepository;
-import ir.pathlens.alerting.rest.util.CommonConfigs;
-import ir.pathlens.extension.kafka.KafkaExtension;
+import ir.pathlens.alerting.rest.util.ControllerTestBase;
+import ir.pathlens.alerting.rest.util.TestData;
 import ir.pathlens.extension.postgresql.PostgresqlExtension;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.jooq.DSLContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,56 +36,44 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ExtendWith({PostgresqlExtension.class, KafkaExtension.class})
+@ExtendWith(PostgresqlExtension.class)
 @SuppressWarnings("unchecked")
-class NotificationControllerTest extends CommonConfigs {
+class NotificationControllerTest extends ControllerTestBase {
 
     @Autowired
     private TestRestTemplate restTemplate;
     @Autowired
-    private RuleRepository ruleRepository;
-    @Autowired
-    private NotificationRepository notificationRepository;
+    private DSLContext dsl;
 
-    private RuleEntity savedRule;
-    private NotificationEntity savedNotification;
+    private UUID ruleId;
+    private UUID notificationId;
 
     @BeforeEach
     void setup() {
-        notificationRepository.deleteAll();
-        ruleRepository.deleteAll();
+        TestData.clearAll(dsl);
         restTemplate.getRestTemplate().setRequestFactory(new JdkClientHttpRequestFactory());
-        savedRule = ruleRepository.save(RuleMapper.fromDto(
-                new RuleCreateDto(
-                        "test-rule",
-                        GeometryUtils.createRandomWkt(),
-                        LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.SECONDS),
-                        new IdentityWrapper(IdentityType.PhoneNumber, "09120000000"),
-                        RuleType.Enter
-                )));
-        savedNotification = new NotificationEntity();
-        savedNotification.setRule(savedRule);
-        savedNotification.setSeen(false);
-        savedNotification = notificationRepository.save(savedNotification);
+        ruleId = TestData.insertRule(dsl, "test-rule", GeometryUtils.createRandomWkt(),
+                LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                new IdentityWrapper(IdentityType.PhoneNumber, "09120000000"), RuleType.Enter, true);
+        notificationId = TestData.insertNotification(dsl, ruleId, false);
     }
 
     @AfterEach
     void cleanUp() {
-        notificationRepository.deleteAll();
-        ruleRepository.deleteAll();
+        TestData.clearAll(dsl);
     }
 
     @Test
     void testGetNotification() {
-        String url = buildPath(GET_NOTIFICATION_PATH, savedNotification.getId().toString());
+        String url = buildPath(GET_NOTIFICATION_PATH, notificationId.toString());
         ResponseEntity<Notification> response = restTemplate.getForEntity(url, Notification.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         Notification body = response.getBody();
         assertNotNull(body);
-        assertEquals(savedNotification.getId(), body.id());
+        assertEquals(notificationId, body.id());
         assertNotNull(body.createdAt());
         assertEquals("PHONE NUMBER 09120000000 has entered the zone", body.message());
-        assertEquals(savedRule.getId(), body.ruleId());
+        assertEquals(ruleId, body.ruleId());
         assertFalse(body.seen());
         assertTrue(body.isActive());
     }
@@ -104,7 +87,7 @@ class NotificationControllerTest extends CommonConfigs {
 
     @Test
     void testSetNotificationSeen() {
-        String url = buildPath(SET_NOTIFICATION_SEEN_PATH, savedNotification.getId().toString());
+        String url = buildPath(SET_NOTIFICATION_SEEN_PATH, notificationId.toString());
         ResponseEntity<Notification> response = restTemplate.exchange(
                 url, HttpMethod.PATCH, null, Notification.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -115,8 +98,7 @@ class NotificationControllerTest extends CommonConfigs {
 
     @Test
     void testSearchNotifications() {
-        ResponseEntity<Map> response = restTemplate.getForEntity(
-                SEARCH_NOTIFICATIONS_PATH, Map.class);
+        ResponseEntity<Map> response = restTemplate.getForEntity(SEARCH_NOTIFICATIONS_PATH, Map.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         Map<String, Object> body = response.getBody();
         assertNotNull(body);
@@ -125,18 +107,23 @@ class NotificationControllerTest extends CommonConfigs {
         assertNotNull(content);
         assertEquals(1, content.size());
         Map<String, Object> notification = content.get(0);
-        assertEquals(savedNotification.getId().toString(), notification.get("id"));
+        assertEquals(notificationId.toString(), notification.get("id"));
+        assertEquals(ruleId.toString(), notification.get("ruleId"));
+        assertEquals("PHONE NUMBER 09120000000 has entered the zone", notification.get("message"));
         assertFalse((Boolean) notification.get("seen"));
         assertTrue((Boolean) notification.get("isActive"));
     }
 
     @Test
     void testSearchNotificationsWithFilter() {
-        String url = SEARCH_NOTIFICATIONS_PATH + "?seen=false";
-        ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        Map<String, Object> body = response.getBody();
-        assertNotNull(body);
-        assertEquals(1, body.get("totalElements"));
+        ResponseEntity<Map> unseen = restTemplate.getForEntity(
+                SEARCH_NOTIFICATIONS_PATH + "?seen=false", Map.class);
+        assertEquals(HttpStatus.OK, unseen.getStatusCode());
+        assertEquals(1, unseen.getBody().get("totalElements"));
+
+        ResponseEntity<Map> seen = restTemplate.getForEntity(
+                SEARCH_NOTIFICATIONS_PATH + "?seen=true", Map.class);
+        assertEquals(HttpStatus.OK, seen.getStatusCode());
+        assertEquals(0, seen.getBody().get("totalElements"));
     }
 }

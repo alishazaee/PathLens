@@ -1,5 +1,6 @@
 package ir.pathlens.alerting.model;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -10,5 +11,6 @@ public record LogResponse(
         boolean isViolated,
         UUID ruleId,
         double latitude,
-        double longitude
+        double longitude,
+        LocalDateTime timestamp
 ) {}

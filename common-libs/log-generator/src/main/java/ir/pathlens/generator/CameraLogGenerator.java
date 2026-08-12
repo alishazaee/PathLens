@@ -142,7 +142,7 @@ public class CameraLogGenerator {
         try {
             return InetAddress.getByAddress(bytes).getHostAddress();
         } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
+            throw new AssertionError("unexpected error happened, ", e);
         }
     }
 
@@ -152,7 +152,7 @@ public class CameraLogGenerator {
         try {
             return InetAddress.getByAddress(bytes).getHostAddress();
         } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
+            throw new AssertionError("unexpected error happened, ", e);
         }
     }
 

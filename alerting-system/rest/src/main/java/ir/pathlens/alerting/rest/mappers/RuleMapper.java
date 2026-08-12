@@ -1,47 +1,33 @@
 package ir.pathlens.alerting.rest.mappers;
 
+import ir.pathlens.alerting.db.jooq.tables.records.RuleRecord;
+import ir.pathlens.alerting.model.IdentityType;
 import ir.pathlens.alerting.model.IdentityWrapper;
 import ir.pathlens.alerting.model.Rule;
-import ir.pathlens.alerting.model.RuleCreateDto;
-import ir.pathlens.alerting.rest.entity.RuleEntity;
+import ir.pathlens.alerting.model.RuleType;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 /**
  * Mapper for rule models.
  */
 public class RuleMapper {
-    public static RuleEntity fromDto(RuleCreateDto rule) {
-        RuleEntity ruleEntity = new RuleEntity();
 
-        ruleEntity.setTitle(rule.title());
-        ruleEntity.setGeometryWkt(rule.geometryWkt());
-        ruleEntity.setIdentity(
-                new IdentityWrapper(
-                        rule.identity().identityType(),
-                        rule.identity().identityValue()
-                )
-        );
-        ruleEntity.setExpiresAt(rule.expiresAt().truncatedTo(ChronoUnit.MICROS));
-        ruleEntity.setRuleType(rule.ruleType());
-
-        return ruleEntity;
-    }
-
-    public static Rule toDto(RuleEntity rule) {
+    public static Rule toDto(RuleRecord rule) {
         return new Rule(
                 rule.getId(),
                 rule.getTitle(),
                 rule.getGeometryWkt(),
                 truncateToMicros(rule.getExpiresAt()),
-                new IdentityWrapper(rule.getIdentity().identityType(), rule.getIdentity().identityValue()),
-                rule.isActive(),
-                rule.getRuleType(),
-                rule.isViolated(),
+                new IdentityWrapper(IdentityType.valueOf(rule.getIdentityType()), rule.getIdentityValue()),
+                rule.getIsActive(),
+                RuleType.valueOf(rule.getRuleType()),
+                rule.getIsViolated(),
                 truncateToMicros(rule.getCreatedAt())
         );
     }
 
-    private static java.time.LocalDateTime truncateToMicros(java.time.LocalDateTime dateTime) {
+    private static LocalDateTime truncateToMicros(LocalDateTime dateTime) {
         return dateTime.truncatedTo(ChronoUnit.MICROS);
     }
 }

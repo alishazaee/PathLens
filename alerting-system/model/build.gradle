@@ -8,6 +8,4 @@ dependencies {
     api(libs.jakartaValidation)
     api(libs.commonsLang)
     implementation(project(":logs-proto:camera:proto"))
-
-    implementation libs.jakartaPersistence
 }

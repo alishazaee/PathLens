@@ -5,11 +5,11 @@ plugins {
 
 dependencies {
     implementation(project(":alerting-system:client"))
+    implementation(project(":alerting-system:alert-db"))
     implementation(project(":logs-proto:camera:proto"))
     implementation(project(":common-libs:parallel-consumer"))
     implementation(libs.jts.core)
     implementation(libs.jedis)
-    implementation(project(":alerting-system:protobuf"))
     implementation 'io.micrometer:micrometer-core:1.15.0'
     implementation 'io.micrometer:micrometer-registry-prometheus:1.15.0'
     implementation 'io.prometheus:prometheus-metrics-exporter-httpserver:1.3.10'
@@ -18,6 +18,9 @@ dependencies {
     api(libs.bundles.jerseyClient)
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.20.0'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.20.0'
+    implementation libs.hikariCP
+    implementation libs.guava
+    runtimeOnly libs.postgresql
 
     testImplementation(project(":common-libs:location-utils"))
     testImplementation(project(":common-libs:log-generator"))

@@ -3,6 +3,7 @@ package ir.pathlens.alerting.rest.controllers;
 import static ir.pathlens.alerting.model.ApiPathConstants.ACTIVATE_RULE_PATH;
 import static ir.pathlens.alerting.model.ApiPathConstants.CREATE_RULE_PATH;
 import static ir.pathlens.alerting.model.ApiPathConstants.DEACTIVATE_RULE_PATH;
+import static ir.pathlens.alerting.model.ApiPathConstants.SEARCH_RULES_PATH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -16,21 +17,20 @@ import ir.pathlens.alerting.model.IdentityWrapper;
 import ir.pathlens.alerting.model.Rule;
 import ir.pathlens.alerting.model.RuleCreateDto;
 import ir.pathlens.alerting.model.RuleType;
-import ir.pathlens.alerting.rest.repository.LogRepository;
-import ir.pathlens.alerting.rest.repository.NotificationRepository;
-import ir.pathlens.alerting.rest.repository.RuleRepository;
-import ir.pathlens.alerting.rest.util.CommonConfigs;
+import ir.pathlens.alerting.rest.util.ControllerTestBase;
+import ir.pathlens.alerting.rest.util.TestData;
 import ir.pathlens.client.ApiCallException;
-import ir.pathlens.extension.kafka.KafkaExtension;
 import ir.pathlens.extension.postgresql.PostgresqlExtension;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import org.jooq.DSLContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,22 +45,20 @@ import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ExtendWith({PostgresqlExtension.class, KafkaExtension.class})
-class RuleControllerTest extends CommonConfigs {
+@ExtendWith(PostgresqlExtension.class)
+@SuppressWarnings("unchecked")
+class RuleControllerTest extends ControllerTestBase {
 
     private final LocalDateTime expiresAt = LocalDateTime.now().plusDays(2).truncatedTo(ChronoUnit.SECONDS);
     private final IdentityWrapper phoneIdentity = new IdentityWrapper(IdentityType.PhoneNumber, "09124505456");
     private final IdentityWrapper plateIdentity = new IdentityWrapper(IdentityType.PlateNumber, "123-j-12");
     private final String phoneWktGeometry = GeometryUtils.createRandomWkt();
     private final String plateWktGeometry = GeometryUtils.createRandomWkt();
+
     @Autowired
     private TestRestTemplate restTemplate;
     @Autowired
-    private RuleRepository ruleRepository;
-    @Autowired
-    private LogRepository logRepository;
-    @Autowired
-    private NotificationRepository notificationRepository;
+    private DSLContext dsl;
     @LocalServerPort
     private int serverPort;
 
@@ -68,17 +66,14 @@ class RuleControllerTest extends CommonConfigs {
 
     @BeforeEach
     void setup() {
-        notificationRepository.deleteAll();
-        ruleRepository.deleteAll();
+        TestData.clearAll(dsl);
         rulesClient = new RulesClient("http://127.0.0.1:" + serverPort);
         restTemplate.getRestTemplate().setRequestFactory(new JdkClientHttpRequestFactory());
     }
 
     @AfterEach
     void cleanUp() {
-        notificationRepository.deleteAll();
-        logRepository.deleteAll();
-        ruleRepository.deleteAll();
+        TestData.clearAll(dsl);
         rulesClient.close();
     }
 
@@ -94,6 +89,33 @@ class RuleControllerTest extends CommonConfigs {
         assertEquals(2, activeRules.size());
         assertTrue(activeRules.contains(phoneRule.getBody()));
         assertTrue(activeRules.contains(plateRule.getBody()));
+    }
+
+    @Test
+    void testSearchRules() {
+        ResponseEntity<Rule> phoneRule = createNewRule(phoneWktGeometry, phoneIdentity, RuleType.Enter);
+        createNewRule(plateWktGeometry, plateIdentity, RuleType.Exit);
+        restTemplate.patchForObject(DEACTIVATE_RULE_PATH, null, Rule.class, phoneRule.getBody().id());
+
+        ResponseEntity<Map> all = restTemplate.getForEntity(SEARCH_RULES_PATH, Map.class);
+        assertEquals(HttpStatus.OK, all.getStatusCode());
+        assertEquals(2, all.getBody().get("totalElements"));
+
+        ResponseEntity<Map> active = restTemplate.getForEntity(SEARCH_RULES_PATH + "?isActive=true", Map.class);
+        assertEquals(HttpStatus.OK, active.getStatusCode());
+        assertEquals(1, active.getBody().get("totalElements"));
+        List<Map<String, Object>> content = (List<Map<String, Object>>) active.getBody().get("content");
+        assertNotNull(content);
+        assertEquals(1, content.size());
+        Map<String, Object> rule = content.get(0);
+        assertEquals("NO NAME", rule.get("title"));
+        assertEquals(plateIdentity.identityValue(),
+                ((Map<String, Object>) rule.get("identity")).get("identityValue"));
+
+        ResponseEntity<Map> byTitle = restTemplate.getForEntity(
+                SEARCH_RULES_PATH + "?title={title}", Map.class, Map.of("title", "NO NAME"));
+        assertEquals(HttpStatus.OK, byTitle.getStatusCode());
+        assertEquals(2, byTitle.getBody().get("totalElements"));
     }
 
     @Test
