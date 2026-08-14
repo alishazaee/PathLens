@@ -30,16 +30,23 @@
             <option value="$PROJECT_DIR$/common-libs" />
             <option value="$PROJECT_DIR$/common-libs/common-exceptions" />
             <option value="$PROJECT_DIR$/common-libs/common-model" />
+            <option value="$PROJECT_DIR$/common-libs/device-csv-generator" />
             <option value="$PROJECT_DIR$/common-libs/location-utils" />
             <option value="$PROJECT_DIR$/common-libs/log-generator" />
             <option value="$PROJECT_DIR$/common-libs/parallel-consumer" />
             <option value="$PROJECT_DIR$/common-libs/test-extensions" />
+            <option value="$PROJECT_DIR$/device" />
+            <option value="$PROJECT_DIR$/device/cache" />
+            <option value="$PROJECT_DIR$/device/client" />
+            <option value="$PROJECT_DIR$/device/model" />
+            <option value="$PROJECT_DIR$/device/rest" />
             <option value="$PROJECT_DIR$/logs-proto" />
             <option value="$PROJECT_DIR$/logs-proto/camera" />
             <option value="$PROJECT_DIR$/logs-proto/camera/parser" />
             <option value="$PROJECT_DIR$/logs-proto/camera/proto" />
             <option value="$PROJECT_DIR$/logs-proto/raw-log" />
             <option value="$PROJECT_DIR$/logs-proto/raw-log/proto" />
+            <option value="$PROJECT_DIR$/processor" />
           </set>
         </option>
       </GradleProjectSettings>

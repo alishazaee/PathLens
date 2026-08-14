@@ -1,0 +1,22 @@
+plugins {
+    id("java-conventions")
+    id("junit5-conventions")
+}
+
+dependencies {
+    implementation(project(":logs-proto:raw-log:proto"))
+    implementation(project(":logs-proto:camera:proto"))
+    implementation(project(":logs-proto:camera:parser"))
+    implementation(project(":device:cache"))
+    implementation(project(":device:client"))
+    implementation(project(":device:model"))
+    implementation(project(":common-libs:parallel-consumer"))
+    implementation(libs.jackson.yaml)
+    implementation("io.micrometer:micrometer-core:1.13.1")
+    implementation("io.micrometer:micrometer-registry-prometheus:1.13.1")
+
+    testImplementation(libs.testcontainersKafka)
+    testImplementation(project(":device:rest"))
+    testImplementation(project(":common-libs:log-generator"))
+    testImplementation("org.awaitility:awaitility:4.2.1")
+}

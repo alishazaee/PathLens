@@ -1,0 +1,31 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
+plugins {
+    id("java-conventions")
+    id("java-library")
+    id("junit5-conventions")
+    id("org.springframework.boot")
+}
+
+dependencies {
+    // Imports Spring Boot maven BOM
+    implementation(platform(SpringBootPlugin.BOM_COORDINATES))
+
+    implementation(project(":device:client"))
+    implementation(project(":device:model"))
+    implementation(project(":common-libs:common-model"))
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    testImplementation(project(":device:rest"))
+    implementation(libs.guava)
+    implementation(libs.springDocWebmvc)
+    runtimeOnly("org.postgresql:postgresql")
+    testImplementation("org.awaitility:awaitility")
+}
+tasks.bootJar {
+    enabled = false
+}
+
+tasks.withType<JavaCompile> {
+    options.compilerArgs.add("-Xlint:-processing")
+}
