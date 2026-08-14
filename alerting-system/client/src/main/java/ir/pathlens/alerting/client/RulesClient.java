@@ -47,11 +47,11 @@ public class RulesClient implements AutoCloseable {
         }
     }
 
-    public Integer getRevisionNumber() throws ApiCallException {
+    public Long getRevisionNumber() throws ApiCallException {
         WebTarget target = client.target(baseUrl).path(buildPath(GET_RULES_REVISION_PATH));
 
         try (Response response = target.request().get()) {
-            return handleError(response, Integer.class);
+            return handleError(response, Long.class);
         }
     }
 

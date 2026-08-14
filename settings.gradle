@@ -18,7 +18,7 @@ rootDir.eachDirRecurse { dir ->
     if (excluded.contains(dir.name)) return
 
     if (new File(dir, "build.gradle").exists() ||
-            new File(dir, "build.gradle").exists()) {
+            new File(dir, "build.gradle.kts").exists()) {
 
         def relPath = rootDir.toPath().relativize(dir.toPath()).toString()
         def projectPath = ":" + relPath.replace(File.separator, ":")

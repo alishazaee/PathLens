@@ -2,3 +2,5 @@ plugins {
     id 'java-conventions'
     id 'jooq-codegen'
 }
+
+ext.jooqPackageName = "ir.pathlens.alerting.db.jooq"

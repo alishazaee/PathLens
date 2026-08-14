@@ -1,0 +1,17 @@
+---
+threadCount: 5
+queueSize: 100
+destinationTopic: "destination"
+trashTopic: "trash"
+sourceTopic: "raw-log-source"
+kafkaConsumerConfig:
+  bootstrapServers: "N/A"
+  autoOffsetReset: "earliest"
+  groupId: "test"
+kafkaProducerConfig:
+  bootstrapServers: "N/A"
+deviceCacheConfig:
+  baseUrl: "N/A"
+  minInitialDelayInMillis: 100
+  maxInitialDelayInMillis: 1000
+  syncIntervalInMillis: 100

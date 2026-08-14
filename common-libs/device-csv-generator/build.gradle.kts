@@ -1,0 +1,8 @@
+plugins {
+    id("java-conventions")
+    id("junit5-conventions")
+}
+
+dependencies {
+    implementation(project(":device:model"))
+}
