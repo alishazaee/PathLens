@@ -15,6 +15,7 @@ public class ApiPathConstants {
     public static final String CREATE_LOCATIONS_PATH = BASE_API + "/locations";
     public static final String GET_LOCATIONS_PATH = BASE_API + "/locations";
     public static final String GET_LOCATION_PATH = BASE_API + "/locations/{siteId}";
+    public static final String DELETE_LOCATION_PATH = BASE_API + "/locations/{siteId}";
 
     public static String buildPath(String template, Object... values) {
         String result = template;

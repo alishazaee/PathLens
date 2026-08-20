@@ -88,7 +88,7 @@ public class DeviceCache implements Closeable {
             logger.info("Updating device cache from revision {} → {}", currentRevision.get(), serverRevision);
 
             Page<DeviceResponseDto> pagination = Page.of(List.of(), 0, DEFAULT_PAGE_SIZE, 0);
-            DeviceFilter filter = new DeviceFilter(true, null, null, null, null, null);
+            DeviceFilter filter = new DeviceFilter(true, null, null, null, null, null, null);
             Page<DeviceResponseDto> response = client.getDevices(filter, pagination);
 
             Map<String, DeviceResponseDto> updatedMap = new ConcurrentHashMap<>();

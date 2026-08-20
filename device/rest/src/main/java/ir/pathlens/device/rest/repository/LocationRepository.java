@@ -61,6 +61,10 @@ public class LocationRepository {
                 .fetchOne();
     }
 
+    public void deleteById(String siteId) {
+        dsl.deleteFrom(LOCATIONS).where(LOCATIONS.SITE_ID.eq(siteId)).execute();
+    }
+
     public void deleteAll() {
         dsl.deleteFrom(LOCATIONS).execute();
     }

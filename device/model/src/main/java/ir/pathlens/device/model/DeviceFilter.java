@@ -13,6 +13,8 @@ public record DeviceFilter(
 
         String serialNumber,
 
+        DeviceType type,
+
         @DecimalMin(value = "-90.0")
         @DecimalMax(value = "90.0")
         Float minLatitude,
