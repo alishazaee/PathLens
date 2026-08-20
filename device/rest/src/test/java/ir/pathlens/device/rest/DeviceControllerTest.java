@@ -76,13 +76,13 @@ class DeviceControllerTest extends BaseControllerTest {
         assertEquals(3, firstPage.totalElements());
         assertEquals(2, firstPage.content().size());
 
-        DeviceFilter bySerial = new DeviceFilter(null, "DEV-5", null, null, null, null);
+        DeviceFilter bySerial = new DeviceFilter(null, "DEV-5", null, null, null, null, null);
         Page<DeviceResponseDto> bySerialPage = client.getDevices(bySerial, Page.of(List.of(), 0, 10, 0));
 
         assertEquals(1, bySerialPage.totalElements());
         assertEquals("DEV-5", bySerialPage.content().get(0).serialNumber());
 
-        DeviceFilter justActive = new DeviceFilter(true, null, null, null, null, null);
+        DeviceFilter justActive = new DeviceFilter(true, null, null, null, null, null, null);
         Page<DeviceResponseDto> activePage = client.getDevices(justActive, Page.of(List.of(), 0, 10, 0));
 
         assertEquals(2, activePage.totalElements());

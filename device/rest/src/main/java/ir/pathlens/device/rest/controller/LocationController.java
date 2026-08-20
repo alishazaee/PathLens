@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,6 +41,12 @@ public class LocationController {
     @GetMapping(ApiPathConstants.GET_LOCATIONS_PATH)
     public Page<LocationResponseDto> getLocations(@ParameterObject Pageable pageable) {
         return locationService.getPaginatedLocations(pageable);
+    }
+
+    @DeleteMapping(ApiPathConstants.DELETE_LOCATION_PATH)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteLocation(@PathVariable String siteId) {
+        locationService.deleteLocation(siteId);
     }
 }
 

@@ -6,6 +6,8 @@ import static ir.pathlens.device.rest.db.Tables.LOCATIONS;
 import ir.pathlens.device.model.DeviceCreateRequestDto;
 import ir.pathlens.device.model.DeviceFilter;
 import ir.pathlens.device.model.DeviceStatus;
+import ir.pathlens.device.model.DeviceType;
+import ir.pathlens.device.rest.db.tables.Device;
 import ir.pathlens.device.rest.db.tables.records.DeviceRecord;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,6 +31,13 @@ public class DeviceRepository {
 
     public Optional<DeviceRecord> findById(int id) {
         return dsl.selectFrom(DEVICE).where(DEVICE.ID.eq(id)).fetchOptional();
+    }
+
+    public List<DeviceRecord> findBySiteId(String siteId) {
+        return dsl.select(DEVICE.fields())
+                .from(DEVICE)
+                .where(DEVICE.SITE_ID.equal(siteId))
+                .fetchInto(DEVICE);
     }
 
     public Optional<DeviceRecord> findBySerialNumber(String serialNumber) {
@@ -81,6 +90,10 @@ public class DeviceRepository {
         }
         if (filter.serialNumber() != null) {
             condition = condition.and(DEVICE.SERIAL_NUMBER.eq(filter.serialNumber()));
+        }
+        DeviceType type = filter.type();
+        if (type != null) {
+            condition = condition.and(DEVICE.DEVICE_TYPE.eq(type.name()));
         }
         if (filter.minLatitude() != null) {
             condition = condition.and(LOCATIONS.LATITUDE.greaterOrEqual(filter.minLatitude().doubleValue()));
