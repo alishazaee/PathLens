@@ -39,7 +39,7 @@ public class DeviceService {
 
     public DeviceResponseDto createDevice(DeviceCreateRequestDto request) {
         if (deviceRepository.findBySerialNumber(request.serialNumber()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "the device is already present: " + request.serialNumber());
         }
         LocationsRecord location = locationRepository.findById(request.siteId())

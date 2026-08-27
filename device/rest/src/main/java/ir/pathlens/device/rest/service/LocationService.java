@@ -31,12 +31,12 @@ public class LocationService {
 
     public LocationResponseDto createLocation(LocationCreateDto request) {
         if (locationRepository.existsById(request.site())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Location already exists: " + request.site());
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Location already exists: " + request.site());
         }
 
         LocationsRecord saved = locationRepository.insertIfAbsent(request);
         if (saved == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Location already exists: " + request.site());
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Location already exists: " + request.site());
         }
 
         return toDto(saved);

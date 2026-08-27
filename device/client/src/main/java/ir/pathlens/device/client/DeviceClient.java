@@ -199,14 +199,27 @@ public class DeviceClient implements AutoCloseable {
     }
 
     private <T> T handleError(Response response, Class<T> clazz) throws ApiCallException {
+
         if (response.getStatusInfo().getFamily() != SUCCESSFUL) {
             String errMessage = response.readEntity(String.class);
-            logger.error("DeviceCacheClient API error: {}", errMessage);
+
+            logger.error(
+                    "DeviceCacheClient API error: status={}, message={}",
+                    response.getStatus(),
+                    errMessage
+            );
+
+            if (response.getStatus() == Response.Status.CONFLICT.getStatusCode()) {
+                throw new AlreadyExistsException(errMessage);
+            }
+
             throw new ApiCallException(errMessage);
         }
+
         if (clazz != null) {
             return response.readEntity(clazz);
         }
+
         return null;
     }
 

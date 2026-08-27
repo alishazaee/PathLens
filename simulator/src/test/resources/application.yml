@@ -1,0 +1,9 @@
+bootstrapServers: N/A
+topic: my-topic
+minBatchSize: 100
+maxBatchSize: 120
+intervalMillis: 1000
+lingerMs: 10
+bufferMemory: 33554432
+batchSizeKafka: 16384
+numberOfDevices: 5

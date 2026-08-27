@@ -47,6 +47,7 @@
             <option value="$PROJECT_DIR$/logs-proto/raw-log" />
             <option value="$PROJECT_DIR$/logs-proto/raw-log/proto" />
             <option value="$PROJECT_DIR$/processor" />
+            <option value="$PROJECT_DIR$/simulator" />
           </set>
         </option>
       </GradleProjectSettings>
