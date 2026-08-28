@@ -1,0 +1,22 @@
+plugins {
+    id 'java-conventions'
+    id 'junit5-conventions'
+}
+
+dependencies {
+    implementation project(':common-libs:log-generator')
+    implementation project(':logs-proto:raw-log:proto')
+    implementation project(':logs-proto:camera:parser')
+    implementation project(':device:client')
+    implementation project(':device:model')
+    implementation 'org.apache.kafka:kafka-clients:4.1.0'
+    implementation libs.jackson.yaml
+    implementation libs.guava
+
+    testImplementation project(':device:rest')
+    testImplementation project(':device:client')
+    testImplementation project(':common-libs:test-extensions')
+    testImplementation libs.testcontainersKafka
+    testImplementation 'org.awaitility:awaitility:4.2.1'
+    testImplementation 'org.apache.kafka:kafka-clients:4.1.0'
+}
