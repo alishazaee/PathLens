@@ -1,0 +1,3 @@
+# The simulator generates synthetic traffic and must never run against production.
+# This file exists for structural consistency only; do not deploy this release in prod.
+replicaCount: 0

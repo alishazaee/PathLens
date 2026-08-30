@@ -1,0 +1,71 @@
+# Default values for processor. Override per environment with values-<env>.yaml.
+
+replicaCount: 1
+
+image:
+  repository: pathlens/processor
+  tag: latest
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+podAnnotations: {}
+podSecurityContext:
+  runAsNonRoot: true
+  fsGroup: 1000
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  runAsUser: 1000
+  capabilities:
+    drop: ["ALL"]
+
+metrics:
+  enabled: true
+  port: 9404
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 384Mi
+  limits:
+    cpu: 1000m
+    memory: 768Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+
+# Rendered as /config/application.yml inside the container (matches
+# ir.pathlens.processor.configs.ApplicationConfig). `prometheusPortNumber` is deliberately not
+# listed here - the chart injects it from `metrics.port` so the port the app binds and the port
+# the Service/Deployment expose can never drift apart. Kafka endpoints default to the
+# `pathlens-infra` release (charts/pathlens-infra); override them for a managed Kafka.
+# No secrets are needed here today, but if a future config field requires one, set it with
+# --set at install time rather than committing it.
+config:
+  threadCount: 5
+  queueSize: 1000
+  sourceTopic: raw-log-source
+  trashTopic: trash
+  destinationTopic: destination
+  kafkaConsumerConfig:
+    bootstrapServers: "pathlens-infra-kafka:9092"
+    autoOffsetReset: earliest
+    groupId: processor
+  kafkaProducerConfig:
+    bootstrapServers: "pathlens-infra-kafka:9092"
+  deviceCacheConfig:
+    baseUrl: "http://device-rest"
+    minInitialDelayInMillis: 1000
+    maxInitialDelayInMillis: 5000
+    syncIntervalInMillis: 30000
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

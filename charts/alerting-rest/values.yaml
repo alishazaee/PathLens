@@ -1,0 +1,93 @@
+# Default values for alerting-rest. Override per environment with values-<env>.yaml.
+
+replicaCount: 1
+
+image:
+  repository: pathlens/alerting-rest
+  tag: latest
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+podAnnotations: {}
+podSecurityContext:
+  runAsNonRoot: true
+  fsGroup: 1000
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  runAsUser: 1000
+  capabilities:
+    drop: ["ALL"]
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+# Non-secret application configuration, exposed to the container as environment variables.
+# Never put passwords or API keys here - use `database.existingSecret` / `database.password` instead.
+env: {}
+
+database:
+  # Defaults point at the `pathlens-infra` release (charts/pathlens-infra), which deploys
+  # PostgreSQL into this same namespace and creates both application databases. Override host
+  # and port instead when the environment provides a managed PostgreSQL.
+  host: pathlens-infra-postgresql
+  port: 5432
+  name: alert_db
+  username: pathlens
+  # Real password must never be committed. Either:
+  #  - set `existingSecret`/`existingSecretPasswordKey` to point at a pre-created Secret, or
+  #  - pass `--set database.password=...` at install time from a vault-protected value
+  #    (this is what ansible/roles/pathlens_helm does).
+  existingSecret: ""
+  existingSecretPasswordKey: "password"
+  password: ""
+
+logging:
+  level: INFO
+
+resources:
+  requests:
+    cpu: 150m
+    memory: 320Mi
+  limits:
+    cpu: 750m
+    memory: 512Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+
+probes:
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 30
+    periodSeconds: 15
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 15
+    periodSeconds: 10
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  host: alerting.pathlens.local
+  path: /
+  pathType: Prefix
+  tls: []
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

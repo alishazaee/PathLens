@@ -1,0 +1,54 @@
+# Production. Two things are worth deciding deliberately before using this as-is:
+#
+#  1. PostgreSQL runs here as a single primary with a PVC. That is a real database with real
+#     data in it - there is no replica and no backup schedule in this chart. If the platform
+#     offers a managed PostgreSQL, prefer it: set `postgresql.enabled: false` and override
+#     `database.host` (device-rest, alerting-rest) and `config.postgresConfig.url`
+#     (alerting-evaluator) with the managed endpoint.
+#  2. Kafka runs 3 KRaft nodes with replicationFactor 3, so it tolerates one node loss.
+
+postgresql:
+  enabled: true
+  primary:
+    persistence:
+      size: 100Gi
+    resources:
+      requests:
+        cpu: 1000m
+        memory: 2Gi
+      limits:
+        cpu: 4000m
+        memory: 8Gi
+    # Spread the database away from the stateless services where the cluster allows it.
+    podAntiAffinityPreset: soft
+
+kafka:
+  enabled: true
+  controller:
+    replicaCount: 3
+    persistence:
+      size: 100Gi
+    resources:
+      requests:
+        cpu: 1000m
+        memory: 2Gi
+      limits:
+        cpu: 4000m
+        memory: 6Gi
+    podAntiAffinityPreset: hard
+  provisioning:
+    numPartitions: 12
+    replicationFactor: 3
+    topics:
+      - name: raw-log-source
+        partitions: 12
+        replicationFactor: 3
+      - name: destination
+        partitions: 12
+        replicationFactor: 3
+      - name: trash
+        partitions: 3
+        replicationFactor: 3
+      - name: alerting-target-log
+        partitions: 12
+        replicationFactor: 3

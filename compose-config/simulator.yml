@@ -1,0 +1,12 @@
+# /config/application.yml for the simulator in docker-compose. Mirrors
+# charts/simulator/values.yaml (ir.pathlens.simulator.configs.ApplicationConfig).
+bootstrapServers: "kafka:9092"
+topic: raw-log-source
+minBatchSize: 50
+maxBatchSize: 100
+intervalMillis: 1000
+lingerMs: 10
+bufferMemory: 33554432
+batchSizeKafka: 16384
+deviceApiUrl: "http://device-rest:8080"
+numberOfDevices: 10

@@ -1,0 +1,16 @@
+replicaCount: 1
+
+image:
+  tag: test
+
+config:
+  kafkaConsumerConfig:
+    groupId: alerting-evaluator-test
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 384Mi
+  limits:
+    cpu: 1000m
+    memory: 768Mi

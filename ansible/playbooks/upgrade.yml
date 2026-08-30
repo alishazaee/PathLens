@@ -1,0 +1,16 @@
+---
+# Upgrade an existing installation. This runs the same idempotent `helm upgrade --install`
+# flow as deploy.yml, so it is also safe to use for the very first install.
+# Restrict to a single service with -e pathlens_target_service=<chart-name>, and/or bump its
+# image with -e image_tag=<tag> (forwarded to every targeted chart's image.tag value).
+#
+# Usage:
+#   ansible-playbook -i inventories/test playbooks/upgrade.yml --ask-vault-pass \
+#     -e pathlens_target_service=alerting-rest -e image_tag=1.2.3
+- name: Upgrade PathLens on Kubernetes
+  hosts: k8s_deploy
+  gather_facts: false
+  vars:
+    pathlens_state: present
+  roles:
+    - pathlens_helm

@@ -1,0 +1,13 @@
+alerting-rest has been deployed.
+
+Service: {{ include "pathlens.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}
+
+{{- if .Values.ingress.enabled }}
+Ingress host: http://{{ .Values.ingress.host }}{{ .Values.ingress.path }}
+{{- else }}
+No ingress is enabled. Reach the service from inside the cluster, or run:
+  kubectl port-forward svc/{{ include "pathlens.fullname" . }} 8080:{{ .Values.service.port }} -n {{ .Release.Namespace }}
+{{- end }}
+
+Swagger UI:      /swagger-ui.html
+OpenAPI JSON:    /v3/api-docs

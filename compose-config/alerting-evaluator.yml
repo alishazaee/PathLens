@@ -1,0 +1,33 @@
+# /config/application.yml for the alerting evaluator in docker-compose. Mirrors
+# charts/alerting-evaluator/values.yaml (ir.pathlens.alerting.evaluator.configs.ApplicationConfig).
+# The password here is a local-only compose credential, matching the postgres service below it.
+kafkaConsumerConfig:
+  bootstrapServers: "kafka:9092"
+  autoOffsetReset: earliest
+  queueSize: 1000
+  groupId: alerting-evaluator
+  extraConfigs: {}
+sourceTopic: destination
+destinationTopic: alerting-target-log
+kafkaProducerConfig:
+  bootstrapServers: "kafka:9092"
+  extraConfigs: {}
+postgresConfig:
+  url: "jdbc:postgresql://postgres:5432/alert_db"
+  username: postgres
+  password: postgres
+  maximumPoolSize: 10
+  minimumIdle: 2
+  connectionTimeoutInMillis: 30000
+  idleTimeoutInMillis: 600000
+  maxLifetimeInMillis: 1800000
+threadCount: 5
+maxConcurrency: 5
+prometheusPortNumber: 9404
+rulesCacheConfig:
+  baseUrl: "http://alerting-rest:8080"
+  minInitialDelayInMillis: 1000
+  maxInitialDelayInMillis: 5000
+persisterBatchSize: 100
+persistQueueSize: 1000
+persistBatchTimeOutInMillis: 1000

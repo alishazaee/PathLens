@@ -1,0 +1,85 @@
+# Default values for alerting-evaluator. Override per environment with values-<env>.yaml.
+
+replicaCount: 1
+
+image:
+  repository: pathlens/alerting-evaluator
+  tag: latest
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+podAnnotations: {}
+podSecurityContext:
+  runAsNonRoot: true
+  fsGroup: 1000
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  runAsUser: 1000
+  capabilities:
+    drop: ["ALL"]
+
+metrics:
+  enabled: true
+  port: 9404
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 384Mi
+  limits:
+    cpu: 1000m
+    memory: 768Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+
+# Rendered as /config/application.yml inside the container (matches
+# ir.pathlens.alerting.evaluator.configs.ApplicationConfig). `prometheusPortNumber` is
+# deliberately not listed here - the chart injects it from `metrics.port` so the port the app
+# binds and the port the Service/Deployment expose can never drift apart. Kafka and PostgreSQL
+# endpoints default to the `pathlens-infra` release (charts/pathlens-infra); override them for
+# managed services. Never put a real password in a committed values file - pass it at install
+# time instead:
+#   helm upgrade --install ... --set config.postgresConfig.password="$VAULT_VALUE"
+config:
+  kafkaConsumerConfig:
+    bootstrapServers: "pathlens-infra-kafka:9092"
+    autoOffsetReset: earliest
+    queueSize: 1000
+    groupId: alerting-evaluator
+    extraConfigs: {}
+  sourceTopic: destination
+  destinationTopic: alerting-target-log
+  kafkaProducerConfig:
+    bootstrapServers: "pathlens-infra-kafka:9092"
+    extraConfigs: {}
+  postgresConfig:
+    url: "jdbc:postgresql://pathlens-infra-postgresql:5432/alert_db"
+    username: pathlens
+    password: ""
+    maximumPoolSize: 10
+    minimumIdle: 2
+    connectionTimeoutInMillis: 30000
+    idleTimeoutInMillis: 600000
+    maxLifetimeInMillis: 1800000
+  threadCount: 5
+  maxConcurrency: 5
+  rulesCacheConfig:
+    baseUrl: "http://alerting-rest"
+    minInitialDelayInMillis: 1000
+    maxInitialDelayInMillis: 5000
+  persisterBatchSize: 100
+  persistQueueSize: 1000
+  persistBatchTimeOutInMillis: 1000
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

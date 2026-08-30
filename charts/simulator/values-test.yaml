@@ -1,0 +1,7 @@
+replicaCount: 1
+
+image:
+  tag: test
+
+config:
+  numberOfDevices: 20

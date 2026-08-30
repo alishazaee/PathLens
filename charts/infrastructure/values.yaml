@@ -1,0 +1,170 @@
+# Kafka + PostgreSQL for PathLens. Deployed as its own release (`pathlens-infra`) so that the
+# service charts stay independent of *how* the infrastructure is provided:
+#
+#   helm dependency build charts/pathlens-infra
+#   helm upgrade --install pathlens-infra ./charts/pathlens-infra -n pathlens-dev \
+#     -f charts/pathlens-infra/values.yaml -f charts/pathlens-infra/values-dev.yaml \
+#     --set postgresql.auth.password=... --set postgresql.auth.postgresPassword=...
+#
+# With the release named `pathlens-infra`, the subcharts create these in-namespace Services,
+# which are exactly the defaults the service charts point at:
+#   pathlens-infra-postgresql:5432
+#   pathlens-infra-kafka:9092
+#
+# Using an already-existing managed Kafka/PostgreSQL instead: set `kafka.enabled=false` and/or
+# `postgresql.enabled=false` here, and override `database.host` / `config.*.bootstrapServers`
+# in the service charts with the managed endpoint.
+
+global:
+  security:
+    # Bitnami charts refuse images outside the `bitnami` repository unless this is set. We do
+    # override them (see the image blocks below), so it has to be true.
+    allowInsecureImages: true
+
+postgresql:
+  enabled: true
+
+  # As of 2025-08 Bitnami moved all pinned image tags out of docker.io/bitnami into
+  # docker.io/bitnamilegacy; only `latest` remains in the original repository. The tags below
+  # are the ones chart 15.5.38 references, re-pointed at the repository that still serves
+  # them. Mirror them into a private registry and change `registry`/`repository` if you would
+  # rather not depend on Docker Hub at deploy time.
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/postgresql
+    tag: 16.4.0-debian-12-r14
+  volumePermissions:
+    image:
+      registry: docker.io
+      repository: bitnamilegacy/os-shell
+      tag: 12-debian-12-r30
+  metrics:
+    image:
+      registry: docker.io
+      repository: bitnamilegacy/postgres-exporter
+      tag: 0.15.0-debian-12-r43
+
+  auth:
+    # Application role used by device-rest, alerting-rest and alerting-evaluator. It owns both
+    # databases, so all three charts authenticate with this single credential.
+    username: pathlens
+    database: device_db
+    # Never commit either password. Both are supplied at install time - from Ansible Vault
+    # (see ansible/inventories/<env>/group_vars/vault.yml) or --set on the command line.
+    password: ""
+    postgresPassword: ""
+    # Alternatively point at a pre-created Secret holding `password` and `postgres-password`:
+    existingSecret: ""
+
+  primary:
+    initdb:
+      # `auth.database` (device_db) is created by the subchart itself; alert_db is the second
+      # database the stack needs, so it is created here on first initialisation. These scripts
+      # run once, against an empty data directory - they never re-run on upgrade.
+      scripts:
+        01-create-alert-db.sql: |
+          CREATE DATABASE alert_db OWNER pathlens;
+    persistence:
+      enabled: true
+      size: 8Gi
+      storageClass: ""
+    resourcesPreset: "none"
+    resources:
+      requests:
+        cpu: 250m
+        memory: 256Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+
+kafka:
+  enabled: true
+
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/kafka
+    tag: 4.0.0-debian-12-r10
+  defaultInitContainers:
+    volumePermissions:
+      image:
+        registry: docker.io
+        repository: bitnamilegacy/os-shell
+        tag: 12-debian-12-r51
+    autoDiscovery:
+      image:
+        registry: docker.io
+        repository: bitnamilegacy/kubectl
+        tag: 1.33.4-debian-12-r0
+  metrics:
+    jmx:
+      image:
+        registry: docker.io
+        repository: bitnamilegacy/jmx-exporter
+        tag: 1.4.0-debian-12-r0
+
+  # The PathLens producers/consumers connect with plain `bootstrapServers` and no SASL
+  # configuration, so every listener is PLAINTEXT. This is only safe because the brokers are
+  # reachable inside the cluster network alone (no external listener is exposed). Turning on
+  # authentication means setting `sasl.*` here *and* adding the matching client properties to
+  # `config.kafka*Config.extraConfigs` in the service charts.
+  listeners:
+    client:
+      protocol: PLAINTEXT
+    controller:
+      protocol: PLAINTEXT
+    interbroker:
+      protocol: PLAINTEXT
+    external:
+      protocol: PLAINTEXT
+
+  # KRaft combined mode: the controller pods are also the brokers, so `broker.replicaCount`
+  # stays 0 and the cluster size is `controller.replicaCount`.
+  controller:
+    replicaCount: 1
+    persistence:
+      enabled: true
+      size: 8Gi
+      storageClass: ""
+    resourcesPreset: "none"
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1536Mi
+  broker:
+    replicaCount: 0
+
+  # Topics are created up front rather than relying on broker auto-creation, so that partition
+  # counts are deliberate: the processor and evaluator consume with a parallel consumer, and a
+  # 1-partition topic would serialise all of them onto a single thread.
+  provisioning:
+    enabled: true
+    numPartitions: 3
+    replicationFactor: 1
+    resourcesPreset: "none"
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 300m
+        memory: 256Mi
+    topics:
+      # simulator -> processor
+      - name: raw-log-source
+        partitions: 3
+        replicationFactor: 1
+      # processor -> alerting-evaluator
+      - name: destination
+        partitions: 3
+        replicationFactor: 1
+      # processor's dead-letter topic for unparseable records
+      - name: trash
+        partitions: 1
+        replicationFactor: 1
+      # alerting-evaluator's output
+      - name: alerting-target-log
+        partitions: 3
+        replicationFactor: 1

@@ -1,0 +1,8 @@
+alerting-evaluator has been deployed as a background Kafka consumer (no external endpoint).
+
+{{- if .Values.metrics.enabled }}
+Prometheus metrics: {{ include "pathlens.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.metrics.port }}/metrics
+{{- end }}
+
+Check logs with:
+  kubectl logs -f deploy/{{ include "pathlens.fullname" . }} -n {{ .Release.Namespace }}

@@ -1,0 +1,19 @@
+# /config/application.yml for the processor in docker-compose. Mirrors charts/processor/values.yaml
+# (ir.pathlens.processor.configs.ApplicationConfig) with compose-local endpoints.
+threadCount: 5
+queueSize: 1000
+sourceTopic: raw-log-source
+trashTopic: trash
+destinationTopic: destination
+kafkaConsumerConfig:
+  bootstrapServers: "kafka:9092"
+  autoOffsetReset: earliest
+  groupId: processor
+kafkaProducerConfig:
+  bootstrapServers: "kafka:9092"
+deviceCacheConfig:
+  baseUrl: "http://device-rest:8080"
+  minInitialDelayInMillis: 1000
+  maxInitialDelayInMillis: 5000
+  syncIntervalInMillis: 30000
+prometheusPortNumber: 9404

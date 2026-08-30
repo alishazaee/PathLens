@@ -1,0 +1,17 @@
+replicaCount: 2
+
+image:
+  tag: test
+
+service:
+  type: ClusterIP
+
+ingress:
+  enabled: true
+  className: nginx
+  host: pathlens-test.internal
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 4

@@ -1,0 +1,29 @@
+# Dev: single-node everything, small volumes, throwaway data.
+
+postgresql:
+  primary:
+    persistence:
+      size: 2Gi
+    resources:
+      requests:
+        cpu: 100m
+        memory: 192Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+kafka:
+  controller:
+    replicaCount: 1
+    persistence:
+      size: 2Gi
+    resources:
+      requests:
+        cpu: 150m
+        memory: 384Mi
+      limits:
+        cpu: 750m
+        memory: 1Gi
+  provisioning:
+    numPartitions: 3
+    replicationFactor: 1

@@ -1,0 +1,72 @@
+replicaCount: 1
+
+image:
+  repository: pathlens/frontend
+  tag: latest
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+podAnnotations: {}
+podSecurityContext:
+  runAsNonRoot: true
+  fsGroup: 1000
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  runAsUser: 1000
+  capabilities:
+    drop: ["ALL"]
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+# Backend Service DNS names this frontend proxies /api/device and /api/alerting to. These are
+# the in-namespace Service names of the device-rest and alerting-rest releases, so they are the
+# same in every environment; override them only when a backend lives in another namespace.
+# No URLs are ever baked into the built JS bundle - nginx resolves these at container start.
+backends:
+  deviceRestUpstream: "device-rest:80"
+  alertingRestUpstream: "alerting-rest:80"
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 250m
+    memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 4
+  targetCPUUtilizationPercentage: 80
+
+probes:
+  liveness:
+    path: /
+    initialDelaySeconds: 5
+    periodSeconds: 15
+  readiness:
+    path: /
+    initialDelaySeconds: 3
+    periodSeconds: 10
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  host: pathlens.local
+  path: /
+  pathType: Prefix
+  tls: []
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

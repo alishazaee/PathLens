@@ -1,0 +1,22 @@
+# Test/staging: still single-node, but sized closer to prod and with prod-sized partitioning.
+
+postgresql:
+  primary:
+    persistence:
+      size: 8Gi
+    resources:
+      requests:
+        cpu: 250m
+        memory: 256Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+
+kafka:
+  controller:
+    replicaCount: 1
+    persistence:
+      size: 8Gi
+  provisioning:
+    numPartitions: 6
+    replicationFactor: 1

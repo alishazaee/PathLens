@@ -1,0 +1,11 @@
+---
+# Idempotent initial rollout (or re-run) of every PathLens service chart for the targeted
+# environment. Usage:
+#   ansible-playbook -i inventories/dev playbooks/deploy.yml --ask-vault-pass
+- name: Deploy PathLens to Kubernetes
+  hosts: k8s_deploy
+  gather_facts: false
+  vars:
+    pathlens_state: present
+  roles:
+    - pathlens_helm

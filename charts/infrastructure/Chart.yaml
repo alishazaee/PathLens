@@ -1,0 +1,22 @@
+apiVersion: v2
+name: pathlens-infra
+description: Kafka and PostgreSQL that the PathLens services depend on, deployed as Bitnami subcharts
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+
+# Both dependencies are optional: turn one off (`--set kafka.enabled=false`) when the
+# environment already provides a managed Kafka or PostgreSQL, and point the service charts at
+# it instead. Pulling these requires registry access:
+#   helm dependency build charts/pathlens-infra
+dependencies:
+  - name: postgresql
+    # 15.5.38 ships PostgreSQL 16.4, matching the postgres:16 the codebase is built and
+    # tested against (buildSrc/src/main/groovy/jooq-codegen.gradle, PostgresqlExtension).
+    version: 15.5.38
+    repository: oci://registry-1.docker.io/bitnamicharts
+    condition: postgresql.enabled
+  - name: kafka
+    version: 32.4.3
+    repository: oci://registry-1.docker.io/bitnamicharts
+    condition: kafka.enabled
