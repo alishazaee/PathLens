@@ -12,4 +12,5 @@ dependencies {
     implementation 'org.flywaydb:flyway-database-postgresql:10.10.0'
     implementation 'org.testcontainers:postgresql:1.21.4'
     runtimeOnly 'org.postgresql:postgresql:42.7.3'
+    implementation 'com.google.cloud.tools:jib-gradle-plugin:3.4.5'
 }

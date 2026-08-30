@@ -1,6 +1,15 @@
 plugins {
     id 'java-conventions'
     id 'junit5-conventions'
+    id 'docker-build'
+}
+
+dockerImage {
+    imageName = 'alerting-evaluator'
+    mainClass = 'ir.pathlens.alerting.evaluator.EvaluatorMain'
+    jvmOpts = ['-XX:MaxRAMPercentage=75.0', '-XX:+ExitOnOutOfMemoryError']
+    imageTag = '1'
+    args = ['/config/application.yml']
 }
 
 dependencies {

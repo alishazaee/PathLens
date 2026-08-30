@@ -6,6 +6,7 @@ import ir.pathlens.device.model.DeviceFilter;
 import ir.pathlens.device.model.DeviceResponseDto;
 import ir.pathlens.device.model.DeviceStatus;
 import ir.pathlens.device.model.DeviceType;
+import ir.pathlens.device.model.DeviceUpdateRequestDto;
 import ir.pathlens.device.model.LocationResponseDto;
 import ir.pathlens.device.rest.db.tables.records.DeviceRecord;
 import ir.pathlens.device.rest.db.tables.records.LocationsRecord;
@@ -81,6 +82,15 @@ public class DeviceService {
         PageImpl<DeviceResponseDto> page = new PageImpl<>(content, pageable, total);
         return new Page<>(page.getContent(), page.getNumber(), page.getSize(), page.getTotalElements(),
                 page.getTotalPages());
+    }
+
+    public DeviceResponseDto updateDevice(int id, DeviceUpdateRequestDto request) {
+        LocationsRecord location = locationRepository.findById(request.siteId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Location not found"));
+        DeviceRecord updated = deviceRepository.update(id, request)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Device not found"));
+
+        return toDto(updated, location);
     }
 
     public void deleteDevice(int id) {

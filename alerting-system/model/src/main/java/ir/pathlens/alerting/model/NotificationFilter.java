@@ -1,5 +1,6 @@
 package ir.pathlens.alerting.model;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -9,7 +10,8 @@ public record NotificationFilter(
         Boolean seen,
         Boolean isActive,
         String title,
-        UUID ruleId
+        UUID ruleId,
+        LocalDateTime createdAfter
 ) {
 
 }

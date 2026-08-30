@@ -75,6 +75,9 @@ public class NotificationService {
             if (filter.title() != null) {
                 condition = condition.and(RULE.TITLE.eq(filter.title()));
             }
+            if (filter.createdAfter() != null) {
+                condition = condition.and(NOTIFICATION.CREATED_AT.gt(filter.createdAfter()));
+            }
         }
 
         int total = dsl.fetchCount(NOTIFICATION.join(RULE).on(NOTIFICATION.RULE_ID.eq(RULE.ID)), condition);
@@ -84,7 +87,7 @@ public class NotificationService {
                 .select(RULE.fields())
                 .from(NOTIFICATION.join(RULE).on(NOTIFICATION.RULE_ID.eq(RULE.ID)))
                 .where(condition)
-                .orderBy(NOTIFICATION.CREATED_AT)
+                .orderBy(NOTIFICATION.CREATED_AT.desc())
                 .limit(safeSize)
                 .offset((long) safePage * safeSize)
                 .fetch()

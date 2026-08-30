@@ -4,6 +4,14 @@ plugins {
     id 'java-conventions'
     id 'junit5-conventions'
     id 'org.springframework.boot'
+    id 'docker-build'
+}
+
+dockerImage {
+    imageName = 'alerting-rest'
+    mainClass = 'ir.pathlens.alerting.rest.ApplicationLauncher'
+    imageTag = '1'
+    jvmOpts = ['-XX:MaxRAMPercentage=75.0', '-XX:+ExitOnOutOfMemoryError']
 }
 
 dependencies {

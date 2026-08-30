@@ -3,13 +3,13 @@ package ir.pathlens.device.rest.service;
 import ir.pathlens.common.model.Page;
 import ir.pathlens.device.model.LocationCreateDto;
 import ir.pathlens.device.model.LocationResponseDto;
+import ir.pathlens.device.model.LocationUpdateDto;
 import ir.pathlens.device.rest.db.tables.records.DeviceRecord;
 import ir.pathlens.device.rest.db.tables.records.LocationsRecord;
 import ir.pathlens.device.rest.repository.DeviceRepository;
 import ir.pathlens.device.rest.repository.LocationRepository;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -47,6 +47,14 @@ public class LocationService {
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Location not found: " + siteId));
 
         return toDto(record);
+    }
+
+    public LocationResponseDto updateLocation(String siteId, LocationUpdateDto request) {
+        LocationsRecord updated = locationRepository.update(siteId, request)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Location not found: " + siteId));
+
+        return toDto(updated);
     }
 
     public void deleteLocation(String siteId) {

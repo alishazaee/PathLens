@@ -3,6 +3,7 @@ package ir.pathlens.device.rest.repository;
 import static ir.pathlens.device.rest.db.Tables.LOCATIONS;
 
 import ir.pathlens.device.model.LocationCreateDto;
+import ir.pathlens.device.model.LocationUpdateDto;
 import ir.pathlens.device.rest.db.tables.records.LocationsRecord;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +60,17 @@ public class LocationRepository {
                 .doNothing()
                 .returning(LOCATIONS.fields())
                 .fetchOne();
+    }
+
+    public Optional<LocationsRecord> update(String siteId, LocationUpdateDto request) {
+        return dsl.update(LOCATIONS)
+                .set(LOCATIONS.COUNTRY, request.country())
+                .set(LOCATIONS.CITY, request.city())
+                .set(LOCATIONS.LATITUDE, request.latitude() == null ? null : request.latitude().doubleValue())
+                .set(LOCATIONS.LONGITUDE, request.longitude() == null ? null : request.longitude().doubleValue())
+                .where(LOCATIONS.SITE_ID.eq(siteId))
+                .returning(LOCATIONS.fields())
+                .fetchOptional();
     }
 
     public void deleteById(String siteId) {

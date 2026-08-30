@@ -5,6 +5,7 @@ import ir.pathlens.device.model.ApiPathConstants;
 import ir.pathlens.device.model.DeviceCreateRequestDto;
 import ir.pathlens.device.model.DeviceFilter;
 import ir.pathlens.device.model.DeviceResponseDto;
+import ir.pathlens.device.model.DeviceUpdateRequestDto;
 import ir.pathlens.device.rest.service.DeviceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,6 +50,11 @@ public class DeviceController {
     public Page<DeviceResponseDto> getDevices(@ParameterObject DeviceFilter filter,
             @ParameterObject Pageable pageable) {
         return deviceService.getPaginatedDevices(filter, pageable);
+    }
+
+    @PutMapping(ApiPathConstants.UPDATE_DEVICE_PATH)
+    public DeviceResponseDto updateDevice(@PathVariable int id, @RequestBody @Valid DeviceUpdateRequestDto request) {
+        return deviceService.updateDevice(id, request);
     }
 
     @DeleteMapping(ApiPathConstants.DELETE_DEVICE_PATH)

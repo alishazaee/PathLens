@@ -1,6 +1,15 @@
 plugins {
     id 'java-conventions'
     id 'junit5-conventions'
+    id 'docker-build'
+}
+
+dockerImage {
+    imageName = 'simulator'
+    imageTag = '1'
+    mainClass = 'ir.pathlens.simulator.Runner'
+    jvmOpts = ['-XX:MaxRAMPercentage=75.0', '-XX:+ExitOnOutOfMemoryError']
+    args = ['/config/application.yml']
 }
 
 dependencies {

@@ -8,6 +8,7 @@ import ir.pathlens.alerting.db.jooq.tables.records.RuleRecord;
 import ir.pathlens.alerting.model.Rule;
 import ir.pathlens.alerting.model.RuleCreateDto;
 import ir.pathlens.alerting.model.RuleFilter;
+import ir.pathlens.alerting.model.RuleUpdateDto;
 import ir.pathlens.alerting.rest.mappers.RuleMapper;
 import ir.pathlens.common.model.Page;
 import java.time.LocalDateTime;
@@ -57,6 +58,34 @@ public class RuleService {
 
     public Rule deactivateRule(UUID id) {
         return setActive(id, false);
+    }
+
+    public Rule getRule(UUID id) {
+        return findById(id);
+    }
+
+    public Rule updateRule(UUID id, RuleUpdateDto rule) {
+        int updated = dsl.update(RULE)
+                .set(RULE.TITLE, rule.title())
+                .set(RULE.GEOMETRY_WKT, rule.geometryWkt())
+                .set(RULE.EXPIRES_AT, rule.expiresAt().truncatedTo(ChronoUnit.MICROS))
+                .set(RULE.IDENTITY_TYPE, rule.identity().identityType().name())
+                .set(RULE.IDENTITY_VALUE, rule.identity().identityValue())
+                .set(RULE.RULE_TYPE, rule.ruleType().name())
+                .set(RULE.UPDATED_AT, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS))
+                .where(RULE.ID.eq(id))
+                .execute();
+        if (updated == 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Rule with id " + id + " not found");
+        }
+        return findById(id);
+    }
+
+    public void deleteRule(UUID id) {
+        int deleted = dsl.deleteFrom(RULE).where(RULE.ID.eq(id)).execute();
+        if (deleted == 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Rule with id " + id + " not found");
+        }
     }
 
     public Page<Rule> search(RuleFilter filter, int page, int size) {

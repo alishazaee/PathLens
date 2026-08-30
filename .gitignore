@@ -45,4 +45,8 @@ bin/
 frontend/node_modules/
 frontend/dist/
 
+### Ansible ###
+ansible/**/.vault_pass.txt
+ansible/*.retry
+
 .idea

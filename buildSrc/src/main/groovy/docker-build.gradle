@@ -1,0 +1,94 @@
+import com.google.cloud.tools.jib.gradle.JibExtension
+
+plugins {
+    id 'com.google.cloud.tools.jib'
+}
+
+/**
+ * Convention plugin for building the docker image of a deployable PathLens service.
+ *
+ * Only apply this to modules that produce a runnable application/service. Library and model
+ * modules must not apply it. All Dockerfile-equivalent logic lives here so that individual
+ * modules only have to declare *what* goes into the image (name, main class, ...), never *how*
+ * the image is assembled.
+ *
+ */
+class DockerImageExtension {
+    /** Short image name, e.g. "alerting-rest". Required. */
+    String imageName
+
+    /** Repository/namespace the image is published under. */
+    String repository = 'pathlens'
+
+    /** Tag applied to the built image. */
+    String imageTag
+
+    /** Base image the application layers are stacked on. Keep this minimal. */
+    String baseImage = 'eclipse-temurin:17-jre-alpine'
+
+    /** Fully qualified main class to launch. Required. */
+    String mainClass
+
+    /** Extra JVM options, e.g. ["-Xmx256m"]. */
+    List<String> jvmOpts = []
+
+    /** Program arguments passed to the main class. */
+    List<String> args = []
+
+    /** Environment variables baked into the image as defaults (never secrets). */
+    Map<String, String> environment = [:]
+
+    /** Overrides the default `java -cp ... mainClass` entrypoint entirely, when required. */
+    List<String> entrypoint = null
+
+    /** Container user, "uid:gid". Defaults to a non-root user. */
+    String user = '1000:1000'
+
+    /** Working directory inside the container. */
+    String workingDirectory = '/app'
+}
+
+def dockerImage = project.extensions.create('dockerImage', DockerImageExtension)
+
+afterEvaluate {
+    if (!dockerImage.imageName) {
+        throw new GradleException("Project '${project.path}' applies the docker-build convention plugin " +
+                "but does not configure dockerImage.imageName")
+    }
+    if (!dockerImage.mainClass && !dockerImage.entrypoint) {
+        throw new GradleException("Project '${project.path}' must configure either dockerImage.mainClass " +
+                "or dockerImage.entrypoint")
+    }
+
+    if (!dockerImage.imageTag) {
+        throw new GradleException("Project '${project.path}' applies the docker-build convention plugin " +
+                "but does not configure dockerImage.imageTag")
+    }
+
+    String repository = project.findProperty('dockerRepository') ?: dockerImage.repository
+    String tag = project.findProperty('dockerImageTag') ?: dockerImage.imageTag
+
+    project.extensions.configure(JibExtension) { jib ->
+        jib.from {
+            it.image = dockerImage.baseImage
+        }
+        jib.to {
+            it.image = "${repository}/${dockerImage.imageName}"
+            it.tags = [tag] as Set
+        }
+        jib.container { container ->
+            if (dockerImage.mainClass) {
+                container.mainClass = dockerImage.mainClass
+            }
+            container.jvmFlags = dockerImage.jvmOpts
+            container.args = dockerImage.args
+            container.environment = dockerImage.environment
+            container.user = dockerImage.user
+            container.workingDirectory = dockerImage.workingDirectory
+            container.creationTime = 'USE_CURRENT_TIMESTAMP'
+            if (dockerImage.entrypoint) {
+                container.entrypoint = dockerImage.entrypoint
+            }
+        }
+    }
+}

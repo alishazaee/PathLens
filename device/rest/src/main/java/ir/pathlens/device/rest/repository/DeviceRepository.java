@@ -7,7 +7,7 @@ import ir.pathlens.device.model.DeviceCreateRequestDto;
 import ir.pathlens.device.model.DeviceFilter;
 import ir.pathlens.device.model.DeviceStatus;
 import ir.pathlens.device.model.DeviceType;
-import ir.pathlens.device.rest.db.tables.Device;
+import ir.pathlens.device.model.DeviceUpdateRequestDto;
 import ir.pathlens.device.rest.db.tables.records.DeviceRecord;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -72,6 +72,17 @@ public class DeviceRepository {
                         request.siteId())
                 .returning(DEVICE.fields())
                 .fetchOne();
+    }
+
+    public Optional<DeviceRecord> update(int id, DeviceUpdateRequestDto request) {
+        return dsl.update(DEVICE)
+                .set(DEVICE.DEVICE_TYPE, toEnumName(request.type()))
+                .set(DEVICE.STATUS, toEnumName(request.status()))
+                .set(DEVICE.SITE_ID, request.siteId())
+                .set(DEVICE.UPDATED_AT, LocalDateTime.now())
+                .where(DEVICE.ID.eq(id))
+                .returning(DEVICE.fields())
+                .fetchOptional();
     }
 
     public void deleteById(int id) {

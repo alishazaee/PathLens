@@ -14,6 +14,8 @@ public class ApiPathConstants {
     public static final String CREATE_RULE_PATH = RULES_BASE;
     public static final String SEARCH_RULES_PATH = RULES_BASE;
     public static final String GET_RULE_PATH = RULES_BASE + "/{id}";
+    public static final String UPDATE_RULE_PATH = RULES_BASE + "/{id}";
+    public static final String DELETE_RULE_PATH = RULES_BASE + "/{id}";
     public static final String ACTIVATE_RULE_PATH = RULES_BASE + "/{id}/activate";
     public static final String DEACTIVATE_RULE_PATH = RULES_BASE + "/{id}/deactivate";
 
