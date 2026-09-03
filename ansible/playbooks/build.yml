@@ -1,0 +1,48 @@
+---
+- name: Build and publish PathLens application images
+  hosts: k8s_deploy
+  gather_facts: false
+  vars:
+    project_root: "{{ playbook_dir | dirname | dirname }}"
+  pre_tasks:
+    - name: Log in to Docker registry
+      community.docker.docker_login:
+        registry_url: "{{ docker_registry }}"
+        username: "{{ docker_hub_username }}"
+        password: "{{ docker_hub_token }}"
+      no_log: true
+  tasks:
+    - name: Build Non-Java application image
+      community.docker.docker_image:
+        name: "{{ docker_registry }}/{{ docker_namespace }}/{{ item.name }}"
+        tag: "{{ item.version }}"
+        source: build
+        build:
+          path: "{{ project_root }}/{{ item.context }}"
+      loop: "{{ artifacts | selectattr('build_type', 'equalto', 'docker') | list }}"
+      loop_control:
+        label: "{{ item.name }}:{{ item.version }}"
+
+    - name: Push Non-Java application image
+      community.docker.docker_image:
+        name: "{{ docker_registry }}/{{ docker_namespace }}/{{ item.name }}"
+        tag: "{{ item.version }}"
+        source: local
+        push: true
+      loop: "{{ artifacts | selectattr('build_type', 'equalto', 'docker') | list }}"
+      loop_control:
+        label: "{{ item.name }}:{{ item.version }}"
+
+    - name: Build and push JVM image
+      ansible.builtin.command:
+        argv:
+          - ./gradlew
+          - "{{ item.gradle_project }}:jib"
+          - "-PdockerRepository={{ docker_registry }}/{{ docker_namespace }}"
+          - "-PdockerImageTag={{ item.version }}"
+          - "-PdockerUsername={{ docker_hub_username }}"
+          - "-PdockerPassword={{ docker_hub_token }}"
+        chdir: "{{ project_root }}"
+      loop: "{{ artifacts | selectattr('build_type', 'equalto', 'jib') | list }}"
+      loop_control:
+        label: "{{ item.name }}:{{ item.version }}"

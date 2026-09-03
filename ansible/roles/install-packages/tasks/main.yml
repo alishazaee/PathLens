@@ -1,0 +1,21 @@
+---
+- name: Install Python venv support
+  ansible.builtin.apt:
+    name:
+      - python3-full
+      - python3-venv
+    state: present
+    update_cache: true
+
+- name: Create Ansible Python virtual environment
+  ansible.builtin.command:
+    cmd: python3 -m venv /opt/ansible-venv
+    creates: /opt/ansible-venv/bin/python
+
+- name: Install Kubernetes Python dependencies
+  ansible.builtin.pip:
+    name:
+      - kubernetes
+      - PyYAML
+    virtualenv: /opt/ansible-venv
+    virtualenv_command: /usr/bin/python3 -m venv

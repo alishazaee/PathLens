@@ -1,0 +1,34 @@
+{{- if and .Values.kafka.enabled .Values.kafka.provisioning.topics }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-kafka-topics
+  labels:
+    {{- include "pathlens.labels" . | nindent 4 }}
+    app.kubernetes.io/component: kafka-provisioning
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 20
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: topics
+          image: "{{ .Values.kafka.image.repository }}:{{ .Values.kafka.image.tag }}"
+          command: [/bin/bash, -ec]
+          args:
+            - |
+              {{- range .Values.kafka.provisioning.topics }}
+              current_partitions=$(/opt/kafka/bin/kafka-topics.sh --bootstrap-server {{ $.Release.Name }}-kafka:9092 --describe --topic {{ .name }} 2>/dev/null | awk -F 'PartitionCount: ' 'NR == 1 { split($2, value, /[^0-9]/); print value[1] }')
+              if [ -z "$current_partitions" ]; then
+                /opt/kafka/bin/kafka-topics.sh --bootstrap-server {{ $.Release.Name }}-kafka:9092 --create --topic {{ .name }} --partitions {{ .partitions }} --replication-factor {{ .replicationFactor }}
+              elif [ "$current_partitions" -lt {{ .partitions }} ]; then
+                /opt/kafka/bin/kafka-topics.sh --bootstrap-server {{ $.Release.Name }}-kafka:9092 --alter --topic {{ .name }} --partitions {{ .partitions }}
+              elif [ "$current_partitions" -gt {{ .partitions }} ]; then
+                echo "Topic {{ .name }} already has $current_partitions partitions; Kafka cannot reduce partitions."
+              fi
+              /opt/kafka/bin/kafka-configs.sh --bootstrap-server {{ $.Release.Name }}-kafka:9092 --entity-type topics --entity-name {{ .name }} --alter --add-config retention.ms={{ $.Values.kafka.retentionMs }}
+              {{- end }}
+{{- end }}

@@ -1,0 +1,6 @@
+---
+env: test
+namespace: pathlens-test
+kube_context: kind-pathlens-cluster
+kind_cluster_name: pathlens-cluster
+management_password: "{{ management_password_vault }}"

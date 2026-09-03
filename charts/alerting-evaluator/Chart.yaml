@@ -1,0 +1,10 @@
+apiVersion: v2
+name: alerting-evaluator
+description: PathLens alerting rule evaluator (Kafka consumer, rule evaluation, notification persistence)
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+dependencies:
+  - name: pathlens-common
+    version: 0.1.0
+    repository: "file://../pathlens-common"

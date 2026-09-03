@@ -1,0 +1,21 @@
+replicaCount: 2
+
+image:
+  tag: "1.0.0"
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+
+config:
+  kafkaConsumerConfig:
+    groupId: processor-prod
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 512Mi
+  limits:
+    cpu: 2000m
+    memory: 1Gi

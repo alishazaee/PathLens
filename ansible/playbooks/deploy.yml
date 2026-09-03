@@ -1,0 +1,8 @@
+---
+- name: Deploy PathLens to Kubernetes
+  hosts: k8s_deploy
+  gather_facts: false
+  vars:
+    state: present
+  roles:
+    - helm

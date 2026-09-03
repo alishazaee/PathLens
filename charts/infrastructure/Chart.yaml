@@ -1,0 +1,10 @@
+apiVersion: v2
+name: pathlens-infra
+description: First-party PostgreSQL and Kafka resources for PathLens
+type: application
+version: 0.2.0
+appVersion: "1.0.0"
+dependencies:
+  - name: pathlens-common
+    version: 0.1.0
+    repository: "file://../pathlens-common"

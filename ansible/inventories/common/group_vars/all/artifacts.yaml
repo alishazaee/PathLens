@@ -1,0 +1,9 @@
+---
+charts_dir: "{{ playbook_dir | dirname | dirname }}/charts"
+artifacts:
+  - {name: device-rest, version: "1.0.0", build_type: jib, gradle_project: ":device:rest"}
+  - {name: alerting-rest, version: "1.0.0", build_type: jib, gradle_project: ":alerting-system:rest"}
+  - {name: alerting-evaluator, version: "1.0.0", build_type: jib, gradle_project: ":alerting-system:evaluator"}
+  - {name: processor, version: "1.0.0", build_type: jib, gradle_project: ":processor"}
+  - {name: simulator, version: "1.0.0", build_type: jib, gradle_project: ":simulator"}
+  - {name: frontend, version: "1.0.0", build_type: docker, context: frontend}

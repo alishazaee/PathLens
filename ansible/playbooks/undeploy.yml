@@ -1,0 +1,8 @@
+---
+- name: Remove PathLens from Kubernetes
+  hosts: k8s_deploy
+  gather_facts: false
+  vars:
+    state: absent
+  roles:
+    - helm

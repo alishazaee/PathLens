@@ -1,0 +1,5 @@
+---
+env: prod
+namespace: default
+kube_context: production
+management_password: "{{ management_password_vault }}"

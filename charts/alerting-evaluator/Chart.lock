@@ -1,0 +1,6 @@
+dependencies:
+- name: pathlens-common
+  repository: file://../pathlens-common
+  version: 0.1.0
+digest: sha256:c843aea88437ce5c509be4e39256cf5cc56f65ba2545f6e85b2c1e8442a2e49e
+generated: "2026-08-28T13:21:42.846661682Z"

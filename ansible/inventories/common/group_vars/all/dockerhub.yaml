@@ -1,0 +1,5 @@
+---
+docker_registry: docker.io
+docker_namespace: alishazaei
+docker_hub_username: alishazaei
+docker_hub_token: "{{ docker_hub_token_vault }}"

@@ -1,0 +1,52 @@
+# Default values for simulator. Override per environment with values-<env>.yaml.
+# The simulator is a load-generation tool - it is typically only enabled in dev/test.
+
+replicaCount: 1
+
+image:
+  repository: pathlens/simulator
+  tag: latest
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+podAnnotations: {}
+podSecurityContext:
+  runAsNonRoot: true
+  fsGroup: 1000
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  runAsUser: 1000
+  capabilities:
+    drop: ["ALL"]
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# Rendered verbatim as /config/application.yml inside the container (matches
+# ir.pathlens.simulator.configs.ApplicationConfig). `bootstrapServers` defaults to the
+# `pathlens-infra` release (charts/pathlens-infra). No secrets required.
+config:
+  bootstrapServers: "pathlens-infra-kafka:9092"
+  topic: raw-log-source
+  minBatchSize: 50
+  maxBatchSize: 100
+  intervalMillis: 1000
+  lingerMs: 10
+  bufferMemory: 33554432
+  batchSizeKafka: 16384
+  deviceApiUrl: "http://device-rest"
+  numberOfDevices: 10
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

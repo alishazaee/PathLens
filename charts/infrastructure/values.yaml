@@ -1,0 +1,63 @@
+image:
+  tag: "1.0.0"
+
+postgresql:
+  enabled: true
+  image:
+    repository: postgres
+    tag: "16-alpine"
+    pullPolicy: IfNotPresent
+  auth:
+    username: pathlens
+    database: device_db
+    password: ""
+    postgresPassword: ""
+    existingSecret: ""
+  primary:
+    persistence:
+      enabled: true
+      size: 8Gi
+      storageClass: ""
+    resources:
+      requests:
+        cpu: 250m
+        memory: 256Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+
+kafka:
+  enabled: true
+  # Retain application traffic for one hour. Topic provisioning enforces this on every upgrade.
+  retentionMs: "3600000"
+  image:
+    repository: apache/kafka
+    tag: "4.1.0"
+    pullPolicy: IfNotPresent
+  controller:
+    replicaCount: 1
+    persistence:
+      enabled: true
+      size: 8Gi
+      storageClass: ""
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1536Mi
+  provisioning:
+    topics:
+      - name: raw-log-source
+        partitions: 3
+        replicationFactor: 1
+      - name: destination
+        partitions: 3
+        replicationFactor: 1
+      - name: trash
+        partitions: 3
+        replicationFactor: 1
+      - name: alerting-target-log
+        partitions: 3
+        replicationFactor: 1

@@ -1,0 +1,5 @@
+apiVersion: v2
+name: pathlens-common
+description: Shared Helm library (named templates) for all PathLens service charts
+type: library
+version: 0.1.0
