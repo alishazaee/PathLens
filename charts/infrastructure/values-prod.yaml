@@ -37,8 +37,6 @@ kafka:
         memory: 6Gi
     podAntiAffinityPreset: hard
   provisioning:
-    numPartitions: 12
-    replicationFactor: 3
     topics:
       - name: raw-log-source
         partitions: 12
@@ -47,7 +45,7 @@ kafka:
         partitions: 12
         replicationFactor: 3
       - name: trash
-        partitions: 3
+        partitions: 12
         replicationFactor: 3
       - name: alerting-target-log
         partitions: 12

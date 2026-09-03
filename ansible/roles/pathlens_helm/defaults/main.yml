@@ -1,5 +1,0 @@
----
-pathlens_state: present
-pathlens_atomic: true
-pathlens_wait: true
-pathlens_wait_timeout: 5m0s

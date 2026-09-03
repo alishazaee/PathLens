@@ -67,6 +67,8 @@ afterEvaluate {
 
     String repository = project.findProperty('dockerRepository') ?: dockerImage.repository
     String tag = project.findProperty('dockerImageTag') ?: dockerImage.imageTag
+    String registryUsername = project.findProperty('dockerUsername')
+    String registryPassword = project.findProperty('dockerPassword')
 
     project.extensions.configure(JibExtension) { jib ->
         jib.from {
@@ -75,6 +77,8 @@ afterEvaluate {
         jib.to {
             it.image = "${repository}/${dockerImage.imageName}"
             it.tags = [tag] as Set
+            it.auth.username = registryUsername
+            it.auth.password = registryPassword
         }
         jib.container { container ->
             if (dockerImage.mainClass) {

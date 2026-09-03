@@ -1,0 +1,109 @@
+{{- if .Values.postgresql.enabled }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Release.Name }}-postgresql
+  labels:
+    {{- include "pathlens.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgresql
+type: Opaque
+stringData:
+  password: {{ required "postgresql.auth.password is required" .Values.postgresql.auth.password | quote }}
+  postgres-password: {{ required "postgresql.auth.postgresPassword is required" .Values.postgresql.auth.postgresPassword | quote }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-postgresql-init
+  labels:
+    {{- include "pathlens.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgresql
+data:
+  01-create-alert-db.sh: |
+    #!/bin/sh
+    set -eu
+    psql --set ON_ERROR_STOP=1 --username postgres --dbname postgres --set app_password="$PATHLENS_PASSWORD" <<'SQL'
+    CREATE ROLE pathlens LOGIN PASSWORD :'app_password';
+    CREATE DATABASE device_db OWNER pathlens;
+    CREATE DATABASE alert_db OWNER pathlens;
+    SQL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-postgresql
+  labels:
+    {{- include "pathlens.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgresql
+spec:
+  selector:
+    {{- include "pathlens.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: postgresql
+  ports:
+    - {name: postgresql, port: 5432, targetPort: postgresql}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-postgresql
+  labels:
+    {{- include "pathlens.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgresql
+spec:
+  serviceName: {{ .Release.Name }}-postgresql
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "pathlens.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: postgresql
+  template:
+    metadata:
+      labels:
+        {{- include "pathlens.labels" . | nindent 8 }}
+        app.kubernetes.io/component: postgresql
+    spec:
+      containers:
+        - name: postgresql
+          image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
+          imagePullPolicy: {{ .Values.postgresql.image.pullPolicy }}
+          ports:
+            - {name: postgresql, containerPort: 5432}
+          env:
+            - {name: POSTGRES_USER, value: postgres}
+            - {name: POSTGRES_DB, value: postgres}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: {{ .Release.Name }}-postgresql, key: postgres-password}
+            - name: PATHLENS_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: {{ .Release.Name }}-postgresql, key: password}
+          readinessProbe:
+            exec: {command: [pg_isready, -U, postgres, -d, postgres]}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            exec: {command: [pg_isready, -U, postgres, -d, postgres]}
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          resources: {{- toYaml .Values.postgresql.primary.resources | nindent 12 }}
+          volumeMounts:
+            - {name: data, mountPath: /var/lib/postgresql/data}
+            - {name: init, mountPath: /docker-entrypoint-initdb.d}
+      volumes:
+        - name: init
+          configMap: {name: {{ .Release.Name }}-postgresql-init, defaultMode: 0755}
+        {{- if not .Values.postgresql.primary.persistence.enabled }}
+        - {name: data, emptyDir: {}}
+        {{- end }}
+  {{- if .Values.postgresql.primary.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata: {name: data}
+      spec:
+        accessModes: [ReadWriteOnce]
+        {{- with .Values.postgresql.primary.persistence.storageClass }}
+        storageClassName: {{ . | quote }}
+        {{- end }}
+        resources:
+          requests: {storage: {{ .Values.postgresql.primary.persistence.size }}}
+  {{- end }}
+{{- end }}

@@ -18,5 +18,8 @@ kafka:
     persistence:
       size: 8Gi
   provisioning:
-    numPartitions: 6
-    replicationFactor: 1
+    topics:
+      - {name: raw-log-source, partitions: 6, replicationFactor: 1}
+      - {name: destination, partitions: 6, replicationFactor: 1}
+      - {name: trash, partitions: 6, replicationFactor: 1}
+      - {name: alerting-target-log, partitions: 6, replicationFactor: 1}

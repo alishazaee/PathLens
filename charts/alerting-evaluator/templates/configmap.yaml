@@ -5,9 +5,6 @@ metadata:
   labels:
     {{- include "pathlens.labels" . | nindent 4 }}
 data:
-  # `prometheusPortNumber` is injected from .Values.metrics.port rather than taken from
-  # .Values.config, so the port the application binds is by construction the same one the
-  # Deployment declares as a containerPort and the Service exposes.
   application.yml: |
     {{- $config := merge (dict "prometheusPortNumber" (.Values.metrics.port | int)) (deepCopy .Values.config) }}
     {{- toYaml $config | nindent 4 }}

@@ -1,0 +1,37 @@
+---
+- name: Prepare local kind nodes
+  hosts: k8s_deploy
+  gather_facts: false
+  tasks:
+    - name: List kind nodes
+      ansible.builtin.command:
+        argv: [kind, get, nodes, --name, "{{ kind_cluster_name }}"]
+      register: kind_nodes
+      changed_when: false
+
+    - name: Raise inotify instance capacity on every kind node
+      ansible.builtin.command:
+        argv: [docker, exec, "{{ item }}", sysctl, -w, fs.inotify.max_user_instances=8192]
+      loop: "{{ kind_nodes.stdout_lines }}"
+      changed_when: true
+
+    - name: Raise inotify watch capacity on every kind node
+      ansible.builtin.command:
+        argv: [docker, exec, "{{ item }}", sysctl, -w, fs.inotify.max_user_watches=1048576]
+      loop: "{{ kind_nodes.stdout_lines }}"
+      changed_when: true
+
+- import_playbook: build.yml
+  vars:
+    push_images: false
+- name: Load application images into kind
+  hosts: k8s_deploy
+  gather_facts: false
+  tasks:
+    - name: Load application image
+      ansible.builtin.command:
+        argv: [kind, load, docker-image, "{{ docker_registry }}/{{ docker_namespace }}/{{ item.name }}:{{ item.version }}", --name, "{{ kind_cluster_name }}"]
+      loop: "{{ artifacts }}"
+      loop_control: {label: "{{ item.name }}:{{ item.version }}"}
+      changed_when: true
+- import_playbook: deploy.yml

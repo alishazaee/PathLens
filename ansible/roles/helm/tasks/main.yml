@@ -1,0 +1,55 @@
+---
+- name: Ensure target namespace exists
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig | default(omit) }}"
+    context: "{{ kube_context }}"
+    api_version: v1
+    kind: Namespace
+    name: "{{ namespace }}"
+    state: present
+  when: state == 'present'
+
+- name: Deploy or upgrade PathLens service charts
+  kubernetes.core.helm:
+    kubeconfig: "{{ kubeconfig | default(omit) }}"
+    context: "{{ kube_context }}"
+    name: "{{ item.name }}"
+    chart_ref: "{{ charts_dir }}/{{ item.name }}"
+    release_namespace: "{{ namespace }}"
+    create_namespace: false
+    state: present
+    dependency_update: false
+    atomic: "{{ atomic }}"
+    wait: "{{ wait }}"
+    wait_timeout: "{{ wait_timeout }}"
+    values_files:
+      - "{{ charts_dir }}/{{ item.name }}/values.yaml"
+      - "{{ charts_dir }}/{{ item.name }}/values-{{ env }}.yaml"
+    set_values: >-
+      {{ (item.secret_values | default([]))
+         + ([{'value': 'image.repository=' + docker_registry + '/' + docker_namespace + '/' + item.name, 'value_type': 'string'},
+             {'value': 'image.tag=' + ((artifacts | selectattr('name', 'equalto', item.name) | first).version), 'value_type': 'string'}]
+            if (item.set_image_tag | default(true)) else []) }}
+  loop: "{{ services }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - state == 'present'
+    - target_service is not defined or item.name == target_service
+  no_log: "{{ hide_secret_logs | default(true) }}"
+
+- name: Remove PathLens service charts
+  kubernetes.core.helm:
+    kubeconfig: "{{ kubeconfig | default(omit) }}"
+    context: "{{ kube_context }}"
+    name: "{{ item.name }}"
+    release_namespace: "{{ namespace }}"
+    state: absent
+    wait: "{{ wait }}"
+    wait_timeout: "{{ wait_timeout }}"
+  loop: "{{ services | reverse | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - state == 'absent'
+    - target_service is not defined or item.name == target_service

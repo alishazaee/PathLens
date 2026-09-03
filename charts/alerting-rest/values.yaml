@@ -43,7 +43,7 @@ database:
   # Real password must never be committed. Either:
   #  - set `existingSecret`/`existingSecretPasswordKey` to point at a pre-created Secret, or
   #  - pass `--set database.password=...` at install time from a vault-protected value
-  #    (this is what ansible/roles/pathlens_helm does).
+  #    (this is what ansible/roles/helm does).
   existingSecret: ""
   existingSecretPasswordKey: "password"
   password: ""

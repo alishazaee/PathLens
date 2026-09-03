@@ -1,12 +1,8 @@
 ---
-# Uninstalls the PathLens Helm releases for the targeted environment (in reverse dependency
-# order). The namespace itself is left in place - delete it separately if it should go too.
-# Usage:
-#   ansible-playbook -i inventories/dev playbooks/undeploy.yml
 - name: Remove PathLens from Kubernetes
   hosts: k8s_deploy
   gather_facts: false
   vars:
-    pathlens_state: absent
+    state: absent
   roles:
-    - pathlens_helm
+    - helm

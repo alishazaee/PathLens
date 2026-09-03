@@ -1,4 +1,0 @@
-simulator has been deployed as a background load generator (no external endpoint).
-
-Check logs with:
-  kubectl logs -f deploy/{{ include "pathlens.fullname" . }} -n {{ .Release.Namespace }}
